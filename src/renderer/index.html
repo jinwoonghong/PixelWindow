@@ -97,6 +97,108 @@
     #menu button.danger:hover {
       background: #da190b;
     }
+
+    #customizeModal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 255, 255, 0.98);
+      border: 3px solid #333;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+      display: none;
+      z-index: 10001;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    #customizeModal.visible {
+      display: block;
+    }
+
+    #customizeModal h2 {
+      text-align: center;
+      margin-bottom: 15px;
+      color: #333;
+    }
+
+    .accessory-category {
+      margin: 15px 0;
+    }
+
+    .accessory-category h3 {
+      color: #555;
+      margin-bottom: 10px;
+      font-size: 16px;
+      border-bottom: 2px solid #ddd;
+      padding-bottom: 5px;
+    }
+
+    .accessory-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 10px;
+    }
+
+    .accessory-item {
+      background: #f9f9f9;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .accessory-item:hover {
+      transform: scale(1.05);
+      border-color: #4CAF50;
+    }
+
+    .accessory-item.equipped {
+      background: #c8e6c9;
+      border-color: #4CAF50;
+    }
+
+    .accessory-item.locked {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .accessory-item .name {
+      font-weight: bold;
+      margin: 5px 0;
+    }
+
+    .accessory-item .desc {
+      font-size: 11px;
+      color: #666;
+    }
+
+    .accessory-item .requirement {
+      font-size: 10px;
+      color: #999;
+      margin-top: 5px;
+    }
+
+    #customizeModal .close-btn {
+      width: 100%;
+      padding: 10px;
+      margin-top: 15px;
+      background: #666;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    #customizeModal .close-btn:hover {
+      background: #555;
+    }
   </style>
 </head>
 <body>
@@ -128,10 +230,17 @@
         <span id="level">1</span>
       </div>
     </div>
+    <button id="customizeBtn">🎨 꾸미기</button>
     <button id="statsBtn">📊 통계 보기</button>
     <button id="settingsBtn">⚙️ 설정</button>
     <button id="closeMenuBtn">닫기</button>
     <button id="quitBtn" class="danger">❌ 종료</button>
+  </div>
+
+  <div id="customizeModal">
+    <h2>🎨 강아지 꾸미기</h2>
+    <div id="accessoriesContainer"></div>
+    <button class="close-btn" id="closeCustomizeBtn">닫기</button>
   </div>
 
   <script src="index.js"></script>

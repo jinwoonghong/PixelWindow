@@ -1,7 +1,8 @@
 import { Pet } from './pet';
 import { Food } from './food';
 import { CollisionDetector } from './collision';
-import { SaveData, GameStats, GameSettings } from '../../shared/types';
+import { SaveData, GameStats, GameSettings, Inventory } from '../../shared/types';
+import { ACCESSORIES } from '../../shared/constants';
 
 export class GameEngine {
   private canvas: HTMLCanvasElement;
@@ -25,6 +26,11 @@ export class GameEngine {
     foodEaten: {},
     totalExperience: 0,
     sessions: 0
+  };
+
+  // 인벤토리
+  private inventory: Inventory = {
+    unlockedAccessories: []
   };
 
   // 설정
@@ -116,6 +122,9 @@ export class GameEngine {
 
     // 먹이 생성
     this.updateFoodSpawning(deltaTime);
+
+    // 액세서리 해금 체크
+    this.checkUnlocks();
 
     // 자동 저장 (1분마다)
     if (this.accumulatedTime >= 60000) {
@@ -235,7 +244,8 @@ export class GameEngine {
         savedAt: new Date().toISOString(),
         pet: this.pet.getState(),
         stats: this.getStats(),
-        settings: this.settings
+        settings: this.settings,
+        inventory: this.inventory
       };
 
       await window.api.saveGame(saveData);
@@ -263,6 +273,11 @@ export class GameEngine {
           this.settings = saveData.settings;
         }
 
+        // 인벤토리 복원
+        if (saveData.inventory) {
+          this.inventory = saveData.inventory;
+        }
+
         console.log('Game loaded successfully');
         console.log(`Play time: ${Math.floor(this.stats.totalPlayTime / 1000 / 60)} minutes`);
       } else {
@@ -271,6 +286,82 @@ export class GameEngine {
     } catch (error) {
       console.error('Failed to load game:', error);
     }
+  }
+
+  // 액세서리 관련 메서드
+  getInventory(): Inventory {
+    return { ...this.inventory };
+  }
+
+  private checkUnlocks(): void {
+    ACCESSORIES.forEach(accessory => {
+      // 이미 해금되었으면 스킵
+      if (this.inventory.unlockedAccessories.includes(accessory.id)) {
+        return;
+      }
+
+      let shouldUnlock = false;
+      const req = accessory.unlockRequirement;
+
+      switch (req.type) {
+        case 'level':
+          shouldUnlock = this.pet.level >= req.value;
+          break;
+
+        case 'experience':
+          shouldUnlock = this.pet.experience >= req.value;
+          break;
+
+        case 'food':
+          if (req.foodId) {
+            const eaten = this.stats.foodEaten[req.foodId] || 0;
+            shouldUnlock = eaten >= req.value;
+          }
+          break;
+
+        case 'time':
+          // 초 단위
+          const playTimeSeconds = this.stats.totalPlayTime / 1000;
+          shouldUnlock = playTimeSeconds >= req.value;
+          break;
+      }
+
+      if (shouldUnlock) {
+        this.unlockAccessory(accessory.id);
+      }
+    });
+  }
+
+  private unlockAccessory(accessoryId: string): void {
+    if (!this.inventory.unlockedAccessories.includes(accessoryId)) {
+      this.inventory.unlockedAccessories.push(accessoryId);
+
+      const accessory = ACCESSORIES.find(a => a.id === accessoryId);
+      if (accessory) {
+        console.log(`🎉 새로운 액세서리 해금: ${accessory.name}!`);
+
+        // 알림 표시
+        if (typeof window !== 'undefined' && window.api) {
+          window.api.showNotification(
+            '새로운 액세서리 해금! 🎉',
+            `${accessory.name}을(를) 획득했습니다!`
+          );
+        }
+      }
+    }
+  }
+
+  equipAccessory(accessoryId: string): boolean {
+    // 해금되었는지 확인
+    if (!this.inventory.unlockedAccessories.includes(accessoryId)) {
+      return false;
+    }
+
+    return this.pet.equipAccessory(accessoryId);
+  }
+
+  unequipAccessory(accessoryId: string): void {
+    this.pet.unequipAccessory(accessoryId);
   }
 
   private onResize(): void {

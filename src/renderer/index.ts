@@ -1,6 +1,7 @@
 // Renderer process 진입점
 import { GameEngine } from './game/game-engine';
 import { CollisionDetector } from './game/collision';
+import { ACCESSORIES } from '../shared/constants';
 
 // API 타입 정의
 declare global {
@@ -70,6 +71,11 @@ const closeMenuBtn = document.getElementById('closeMenuBtn')!;
 const quitBtn = document.getElementById('quitBtn')!;
 const statsBtn = document.getElementById('statsBtn')!;
 const settingsBtn = document.getElementById('settingsBtn')!;
+const customizeBtn = document.getElementById('customizeBtn')!;
+
+// 꾸미기 모달
+const customizeModal = document.getElementById('customizeModal')!;
+const closeCustomizeBtn = document.getElementById('closeCustomizeBtn')!;
 
 // 메뉴 업데이트 함수
 function updateMenu(): void {
@@ -178,6 +184,142 @@ settingsBtn.addEventListener('click', () => {
     }
   }
 });
+
+// 꾸미기 버튼
+customizeBtn.addEventListener('click', () => {
+  menu.classList.remove('visible');
+  showCustomizeModal();
+});
+
+closeCustomizeBtn.addEventListener('click', () => {
+  customizeModal.classList.remove('visible');
+});
+
+// 꾸미기 모달 표시
+function showCustomizeModal(): void {
+  const inventory = gameEngine.getInventory();
+  const pet = gameEngine.getPet();
+  const equippedAccessories = pet.getEquippedAccessories();
+  const stats = gameEngine.getStats();
+
+  const accessoriesContainer = document.getElementById('accessoriesContainer')!;
+  accessoriesContainer.innerHTML = '';
+
+  // 액세서리를 타입별로 그룹화
+  const groupedAccessories: Record<string, typeof ACCESSORIES> = {};
+  ACCESSORIES.forEach(acc => {
+    if (!groupedAccessories[acc.type]) {
+      groupedAccessories[acc.type] = [];
+    }
+    groupedAccessories[acc.type].push(acc);
+  });
+
+  // 타입별 한글 이름
+  const typeNames: Record<string, string> = {
+    hat: '🎩 모자',
+    necklace: '📿 목걸이',
+    glasses: '👓 안경',
+    ribbon: '🎀 리본',
+    scarf: '🧣 스카프',
+    bow: '🎀 나비 넥타이'
+  };
+
+  // 각 카테고리별로 렌더링
+  for (const [type, accessories] of Object.entries(groupedAccessories)) {
+    const category = document.createElement('div');
+    category.className = 'accessory-category';
+
+    const title = document.createElement('h3');
+    title.textContent = typeNames[type] || type;
+    category.appendChild(title);
+
+    const list = document.createElement('div');
+    list.className = 'accessory-list';
+
+    accessories.forEach(accessory => {
+      const isUnlocked = inventory.unlockedAccessories.includes(accessory.id);
+      const isEquipped = equippedAccessories.some(a => a.id === accessory.id);
+
+      const item = document.createElement('div');
+      item.className = 'accessory-item';
+
+      if (isEquipped) {
+        item.classList.add('equipped');
+      }
+
+      if (!isUnlocked) {
+        item.classList.add('locked');
+      }
+
+      const icon = document.createElement('div');
+      icon.style.fontSize = '24px';
+      icon.textContent = isUnlocked ? '✅' : '🔒';
+      item.appendChild(icon);
+
+      const name = document.createElement('div');
+      name.className = 'name';
+      name.textContent = accessory.name;
+      item.appendChild(name);
+
+      const desc = document.createElement('div');
+      desc.className = 'desc';
+      desc.textContent = accessory.description;
+      item.appendChild(desc);
+
+      if (!isUnlocked) {
+        const requirement = document.createElement('div');
+        requirement.className = 'requirement';
+        requirement.textContent = getRequirementText(accessory.unlockRequirement, stats);
+        item.appendChild(requirement);
+      }
+
+      if (isEquipped) {
+        const equipped = document.createElement('div');
+        equipped.style.color = '#4CAF50';
+        equipped.style.fontWeight = 'bold';
+        equipped.style.marginTop = '5px';
+        equipped.textContent = '착용 중';
+        item.appendChild(equipped);
+      }
+
+      if (isUnlocked) {
+        item.addEventListener('click', () => {
+          if (isEquipped) {
+            gameEngine.unequipAccessory(accessory.id);
+          } else {
+            gameEngine.equipAccessory(accessory.id);
+          }
+          showCustomizeModal(); // 새로고침
+        });
+      }
+
+      list.appendChild(item);
+    });
+
+    category.appendChild(list);
+    accessoriesContainer.appendChild(category);
+  }
+
+  customizeModal.classList.add('visible');
+}
+
+function getRequirementText(req: any, stats: any): string {
+  switch (req.type) {
+    case 'level':
+      return `레벨 ${req.value} 필요`;
+    case 'experience':
+      return `경험치 ${req.value} 필요`;
+    case 'food':
+      const eaten = stats.foodEaten[req.foodId!] || 0;
+      return `${req.foodId} ${eaten}/${req.value}개`;
+    case 'time':
+      const minutes = Math.floor(stats.totalPlayTime / 1000 / 60);
+      const requiredMinutes = Math.floor(req.value / 60);
+      return `플레이 ${minutes}/${requiredMinutes}분`;
+    default:
+      return '';
+  }
+}
 
 // 키보드 단축키 (개발/테스트용)
 window.addEventListener('keydown', (e) => {

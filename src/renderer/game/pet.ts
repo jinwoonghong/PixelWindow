@@ -1,5 +1,5 @@
-import { LEVEL_REQUIREMENTS } from '../../shared/constants';
-import { PetState } from '../../shared/types';
+import { LEVEL_REQUIREMENTS, ACCESSORIES } from '../../shared/constants';
+import { PetState, Accessory } from '../../shared/types';
 
 export type PetAnimationState = 'idle' | 'walking' | 'running' | 'eating' | 'sleeping' | 'sitting' | 'jumping';
 
@@ -25,6 +25,9 @@ export class Pet {
   // 성장
   level: number = 1;
   experience: number = 0;
+
+  // 액세서리
+  equippedAccessories: string[] = [];
 
   // 애니메이션
   currentFrame: number = 0;
@@ -236,6 +239,175 @@ export class Pet {
         break;
       default:
         this.renderIdle(ctx, size, frame);
+    }
+
+    // 액세서리 렌더링
+    this.renderAccessories(ctx, size, scale);
+
+    ctx.restore();
+  }
+
+  private renderAccessories(ctx: CanvasRenderingContext2D, size: number, scale: number): void {
+    const equippedAccessories = this.getEquippedAccessories();
+
+    for (const accessory of equippedAccessories) {
+      const offsetX = accessory.renderOffset.x;
+      const offsetY = accessory.renderOffset.y;
+
+      ctx.save();
+
+      switch (accessory.type) {
+        case 'hat':
+          this.renderHat(ctx, offsetX, offsetY, accessory.id);
+          break;
+        case 'necklace':
+          this.renderNecklace(ctx, offsetX, offsetY, accessory.id);
+          break;
+        case 'glasses':
+          this.renderGlasses(ctx, offsetX, offsetY, accessory.id);
+          break;
+        case 'ribbon':
+          this.renderRibbon(ctx, offsetX, offsetY, accessory.id);
+          break;
+        case 'scarf':
+          this.renderScarf(ctx, offsetX, offsetY, accessory.id);
+          break;
+        case 'bow':
+          this.renderBow(ctx, offsetX, offsetY, accessory.id);
+          break;
+      }
+
+      ctx.restore();
+    }
+  }
+
+  private renderHat(ctx: CanvasRenderingContext2D, offsetX: number, offsetY: number, hatId: string): void {
+    ctx.save();
+    ctx.translate(offsetX, offsetY);
+
+    if (hatId === 'red_hat') {
+      ctx.fillStyle = '#FF0000';
+      ctx.fillRect(6, 0, 20, 2);
+      ctx.fillRect(8, -4, 16, 4);
+    } else if (hatId === 'blue_hat') {
+      ctx.fillStyle = '#0000FF';
+      ctx.fillRect(6, 0, 20, 2);
+      ctx.fillRect(8, -4, 16, 4);
+    } else if (hatId === 'party_hat') {
+      ctx.fillStyle = '#FFD700';
+      ctx.fillRect(15, -6, 2, 2);
+      ctx.fillRect(14, -4, 4, 2);
+      ctx.fillRect(12, -2, 8, 2);
+      ctx.fillRect(10, 0, 12, 2);
+    }
+
+    ctx.restore();
+  }
+
+  private renderNecklace(ctx: CanvasRenderingContext2D, offsetX: number, offsetY: number, necklaceId: string): void {
+    ctx.save();
+    ctx.translate(offsetX, offsetY);
+
+    if (necklaceId === 'simple_necklace') {
+      ctx.fillStyle = '#888888';
+      ctx.fillRect(10, 16, 12, 2);
+    } else if (necklaceId === 'gold_necklace') {
+      ctx.fillStyle = '#FFD700';
+      ctx.fillRect(10, 16, 12, 2);
+      // 펜던트
+      ctx.fillRect(15, 18, 2, 2);
+    }
+
+    ctx.restore();
+  }
+
+  private renderGlasses(ctx: CanvasRenderingContext2D, offsetX: number, offsetY: number, glassesId: string): void {
+    ctx.save();
+    ctx.translate(offsetX, offsetY);
+
+    if (glassesId === 'sunglasses') {
+      ctx.fillStyle = '#000000';
+      // 왼쪽 렌즈
+      ctx.fillRect(11, 8, 4, 3);
+      // 오른쪽 렌즈
+      ctx.fillRect(17, 8, 4, 3);
+      // 다리
+      ctx.fillRect(15, 8, 2, 1);
+    } else if (glassesId === 'round_glasses') {
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 1;
+      // 왼쪽 렌즈
+      ctx.strokeRect(11, 8, 3, 3);
+      // 오른쪽 렌즈
+      ctx.strokeRect(18, 8, 3, 3);
+      // 다리
+      ctx.fillRect(14, 9, 4, 1);
+    }
+
+    ctx.restore();
+  }
+
+  private renderRibbon(ctx: CanvasRenderingContext2D, offsetX: number, offsetY: number, ribbonId: string): void {
+    ctx.save();
+    ctx.translate(offsetX, offsetY);
+
+    if (ribbonId === 'pink_ribbon') {
+      ctx.fillStyle = '#FFB6C1';
+      // 중앙
+      ctx.fillRect(20, 0, 4, 4);
+      // 왼쪽 날개
+      ctx.fillRect(16, 1, 4, 2);
+      // 오른쪽 날개
+      ctx.fillRect(24, 1, 4, 2);
+    } else if (ribbonId === 'red_ribbon') {
+      ctx.fillStyle = '#FF0000';
+      ctx.fillRect(20, 0, 4, 4);
+      ctx.fillRect(16, 1, 4, 2);
+      ctx.fillRect(24, 1, 4, 2);
+    }
+
+    ctx.restore();
+  }
+
+  private renderScarf(ctx: CanvasRenderingContext2D, offsetX: number, offsetY: number, scarfId: string): void {
+    ctx.save();
+    ctx.translate(offsetX, offsetY);
+
+    if (scarfId === 'blue_scarf') {
+      ctx.fillStyle = '#0000FF';
+      // 가로
+      ctx.fillRect(8, 17, 16, 3);
+      // 세로 (왼쪽)
+      ctx.fillRect(10, 20, 3, 4);
+      // 세로 (오른쪽)
+      ctx.fillRect(19, 20, 3, 4);
+    } else if (scarfId === 'yellow_scarf') {
+      ctx.fillStyle = '#FFD700';
+      ctx.fillRect(8, 17, 16, 3);
+      ctx.fillRect(10, 20, 3, 4);
+      ctx.fillRect(19, 20, 3, 4);
+    }
+
+    ctx.restore();
+  }
+
+  private renderBow(ctx: CanvasRenderingContext2D, offsetX: number, offsetY: number, bowId: string): void {
+    ctx.save();
+    ctx.translate(offsetX, offsetY);
+
+    if (bowId === 'black_bow') {
+      ctx.fillStyle = '#000000';
+      // 왼쪽
+      ctx.fillRect(10, 16, 4, 3);
+      // 중앙
+      ctx.fillRect(14, 16, 4, 3);
+      // 오른쪽
+      ctx.fillRect(18, 16, 4, 3);
+    } else if (bowId === 'red_bow') {
+      ctx.fillStyle = '#FF0000';
+      ctx.fillRect(10, 16, 4, 3);
+      ctx.fillRect(14, 16, 4, 3);
+      ctx.fillRect(18, 16, 4, 3);
     }
 
     ctx.restore();
@@ -476,6 +648,35 @@ export class Pet {
     }
   }
 
+  // 액세서리 관련 메서드
+  equipAccessory(accessoryId: string): boolean {
+    const accessory = ACCESSORIES.find(a => a.id === accessoryId);
+    if (!accessory) return false;
+
+    // 같은 타입의 액세서리는 하나만 장착 가능
+    this.equippedAccessories = this.equippedAccessories.filter(id => {
+      const existing = ACCESSORIES.find(a => a.id === id);
+      return existing?.type !== accessory.type;
+    });
+
+    this.equippedAccessories.push(accessoryId);
+    return true;
+  }
+
+  unequipAccessory(accessoryId: string): void {
+    this.equippedAccessories = this.equippedAccessories.filter(id => id !== accessoryId);
+  }
+
+  unequipAll(): void {
+    this.equippedAccessories = [];
+  }
+
+  getEquippedAccessories(): Accessory[] {
+    return this.equippedAccessories
+      .map(id => ACCESSORIES.find(a => a.id === id))
+      .filter(a => a !== undefined) as Accessory[];
+  }
+
   getState(): PetState {
     return {
       x: this.x,
@@ -484,7 +685,8 @@ export class Pet {
       experience: this.experience,
       hunger: this.hunger,
       happiness: this.happiness,
-      energy: this.energy
+      energy: this.energy,
+      equippedAccessories: [...this.equippedAccessories]
     };
   }
 
@@ -496,6 +698,7 @@ export class Pet {
     this.hunger = state.hunger;
     this.happiness = state.happiness;
     this.energy = state.energy;
+    this.equippedAccessories = state.equippedAccessories || [];
 
     // 레벨에 따른 크기 조정
     const levelData = LEVEL_REQUIREMENTS.find(l => l.level === this.level);
