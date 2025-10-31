@@ -30,20 +30,15 @@ export class WindowManager {
       }
     });
 
-    // HTML 로드
     this.mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
 
-    // 개발 모드에서 DevTools 열기
     if (process.env.NODE_ENV === 'development') {
       this.mainWindow.webContents.openDevTools({ mode: 'detach' });
     }
 
-    // 윈도우가 닫혔을 때
     this.mainWindow.on('closed', () => {
       this.mainWindow = null;
     });
-
-    console.log('Main window created');
   }
 
   getMainWindow(): BrowserWindow | null {

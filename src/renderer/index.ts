@@ -10,7 +10,7 @@ declare global {
       saveGame: (data: any) => Promise<any>;
       loadGame: () => Promise<any>;
       deleteSave: () => Promise<any>;
-      setClickable: (bounds: { x: number; y: number; width: number; height: number }) => void;
+      setClickable: () => void;
       setClickThrough: () => void;
       showNotification: (title: string, body: string) => void;
       quitApp: () => void;
@@ -18,9 +18,6 @@ declare global {
   }
 }
 
-console.log('🐕 PixelWindow Starting...');
-
-// Canvas 가져오기
 const canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
 if (!canvas) {
   throw new Error('Canvas element not found');
@@ -71,19 +68,13 @@ let isOverPet = false;
 window.addEventListener('mousemove', (e) => {
   const pet = gameEngine.getPet();
   const petBounds = pet.getBounds();
-
-  // 마우스가 Pet 위에 있는지 체크
   const mouseOverPet = collisionDetector.checkPointInRect(e.clientX, e.clientY, petBounds);
 
-  // 상태가 바뀌었을 때만 IPC 메시지 전송 (성능 최적화)
   if (mouseOverPet !== isOverPet) {
     isOverPet = mouseOverPet;
-
     if (isOverPet) {
-      // Pet 위에서는 클릭 가능
-      window.api.setClickable(petBounds);
+      window.api.setClickable();
     } else {
-      // Pet 밖에서는 클릭 통과
       window.api.setClickThrough();
     }
   }
@@ -355,35 +346,25 @@ window.addEventListener('keydown', (e) => {
     }
   }
 
-  // Ctrl+Shift+F: 랜덤 먹이 생성
   if (e.ctrlKey && e.shiftKey && e.key === 'F') {
     gameEngine.spawnRandomFood();
-    console.log('Spawned random food (hotkey)');
   }
 
-  // Ctrl+Shift+L: 레벨업 테스트
   if (e.ctrlKey && e.shiftKey && e.key === 'L') {
     gameEngine.testLevelUp();
-    console.log('Level up test (hotkey)');
   }
 
-  // Ctrl+Shift+A: 모든 먹이 생성
   if (e.ctrlKey && e.shiftKey && e.key === 'A') {
     gameEngine.testSpawnAllFoods();
-    console.log('Spawned all food types (hotkey)');
   }
 });
 
-// 앱 종료 시 자동 저장
 window.addEventListener('beforeunload', async (e) => {
   await gameEngine.saveGame();
 });
 
-// 게임 시작
-console.log('🎮 Starting game engine...');
 gameEngine.start();
 
-// 시작 알림
 setTimeout(() => {
   window.api.showNotification(
     'PixelWindow 🐕',
@@ -391,15 +372,6 @@ setTimeout(() => {
   );
 }, 1000);
 
-// 첫 번째 먹이 생성 (10초 후)
 setTimeout(() => {
   gameEngine.spawnRandomFood();
-  console.log('Initial food spawned');
 }, 10000);
-
-console.log('✅ PixelWindow Ready!');
-console.log('Controls:');
-console.log('  - Click on pet to open menu');
-console.log('  - Ctrl+Shift+F: Spawn food');
-console.log('  - Ctrl+Shift+L: Level up test');
-console.log('  - Ctrl+Shift+D: Toggle debug info');
