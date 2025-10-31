@@ -3,8 +3,9 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import { IPC_CHANNELS } from '../shared/ipc-channels';
 import { SaveData } from '../shared/types';
+import { WindowManager } from './window-manager';
 
-export function setupIpcHandlers(): void {
+export function setupIpcHandlers(windowManager: WindowManager): void {
   // 게임 저장
   ipcMain.handle(IPC_CHANNELS.SAVE_GAME, async (event, saveData: SaveData) => {
     try {
@@ -58,6 +59,19 @@ export function setupIpcHandlers(): void {
   // 앱 종료
   ipcMain.on(IPC_CHANNELS.QUIT_APP, () => {
     app.quit();
+  });
+
+  // 클릭 가능 영역 설정 (투명 영역은 클릭 통과)
+  ipcMain.on(IPC_CHANNELS.SET_CLICKABLE, (event, bounds: { x: number; y: number; width: number; height: number }) => {
+    // 마우스 이벤트를 무시하지만, 특정 영역에서는 허용
+    // forward: true는 투명 영역의 클릭을 아래 윈도우로 전달
+    windowManager.setIgnoreMouseEvents(false);
+  });
+
+  // 클릭 통과 모드 (완전히 투명, 클릭이 아래로 전달됨)
+  ipcMain.on(IPC_CHANNELS.SET_CLICK_THROUGH, () => {
+    // forward: true는 클릭을 아래 윈도우로 전달
+    windowManager.setIgnoreMouseEvents(true, { forward: true });
   });
 
   console.log('IPC handlers registered');

@@ -8,12 +8,12 @@ let windowManager: WindowManager;
 let trayManager: TrayManager;
 
 function createApp(): void {
-  // IPC 핸들러 설정
-  setupIpcHandlers();
-
   // 윈도우 매니저 초기화
   windowManager = new WindowManager();
   windowManager.createMainWindow();
+
+  // IPC 핸들러 설정 (WindowManager 전달)
+  setupIpcHandlers(windowManager);
 
   // 트레이 매니저 초기화
   trayManager = new TrayManager(windowManager);

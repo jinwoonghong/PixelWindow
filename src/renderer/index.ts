@@ -65,6 +65,30 @@ function updateDebugInfo(): void {
 // 디버그 업데이트 루프
 setInterval(updateDebugInfo, 16);
 
+// 클릭 통과 기능: 마우스가 강아지 위에 있을 때만 클릭 가능
+let isOverPet = false;
+
+window.addEventListener('mousemove', (e) => {
+  const pet = gameEngine.getPet();
+  const petBounds = pet.getBounds();
+
+  // 마우스가 Pet 위에 있는지 체크
+  const mouseOverPet = collisionDetector.checkPointInRect(e.clientX, e.clientY, petBounds);
+
+  // 상태가 바뀌었을 때만 IPC 메시지 전송 (성능 최적화)
+  if (mouseOverPet !== isOverPet) {
+    isOverPet = mouseOverPet;
+
+    if (isOverPet) {
+      // Pet 위에서는 클릭 가능
+      window.api.setClickable(petBounds);
+    } else {
+      // Pet 밖에서는 클릭 통과
+      window.api.setClickThrough();
+    }
+  }
+});
+
 // 메뉴 관련
 const menu = document.getElementById('menu')!;
 const closeMenuBtn = document.getElementById('closeMenuBtn')!;
