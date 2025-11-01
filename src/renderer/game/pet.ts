@@ -38,11 +38,13 @@ export class Pet {
   aiTimer: number = 0;
   aiDelay: number = 2000; // ms
   targetX: number = 0;
+  targetY: number = 0;
 
   constructor(x: number, y: number) {
     this.x = x;
     this.y = y;
     this.targetX = x;
+    this.targetY = y;
   }
 
   update(deltaTime: number, screenWidth: number, screenHeight: number): void {

@@ -117,13 +117,12 @@ canvas.addEventListener('click', (e) => {
     if (menu.classList.contains('visible')) {
       menu.classList.remove('visible');
     } else {
-      // 메뉴를 화면 우하단 고정 위치에 표시
-      const menuWidth = 160;
-      const menuHeight = 240;
-      const margin = 20;
+      // 메뉴를 화면 우하단 고정 위치에 표시 (작업표시줄 위)
+      const marginRight = 20;
+      const marginBottom = 60; // 작업표시줄을 고려한 여백
 
-      menu.style.right = `${margin}px`;
-      menu.style.bottom = `${margin}px`;
+      menu.style.right = `${marginRight}px`;
+      menu.style.bottom = `${marginBottom}px`;
       menu.style.left = 'auto';
       menu.style.top = 'auto';
       menu.classList.add('visible');
