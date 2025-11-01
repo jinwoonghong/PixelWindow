@@ -17,11 +17,31 @@ export class Food {
   bobOffset: number = 0;
   bobSpeed: number = 0.05;
 
+  // 이미지 캐시 (static으로 모든 인스턴스가 공유)
+  private static imageCache: Map<string, HTMLImageElement> = new Map();
+  private static imagesLoaded: Set<string> = new Set();
+
   constructor(type: FoodType, x: number, y: number) {
     this.type = type;
     this.x = x;
     this.y = y;
     this.spawnTime = Date.now();
+    Food.loadImage(type.id);
+  }
+
+  private static loadImage(foodId: string): void {
+    if (Food.imagesLoaded.has(foodId)) return;
+
+    const img = new Image();
+    img.onload = () => {
+      Food.imageCache.set(foodId, img);
+      Food.imagesLoaded.add(foodId);
+      console.log(`Food image ${foodId} loaded`);
+    };
+    img.onerror = () => {
+      console.warn(`Failed to load food image ${foodId}, using pixel art fallback`);
+    };
+    img.src = `assets/sprites/food/${foodId}.png`;
   }
 
   update(deltaTime: number): void {
@@ -42,25 +62,31 @@ export class Food {
     ctx.save();
     ctx.translate(this.x, renderY);
 
-    // 먹이 종류에 따라 다른 렌더링
-    switch (this.type.id) {
-      case 'bone':
-        this.renderBone(ctx);
-        break;
-      case 'fish':
-        this.renderFish(ctx);
-        break;
-      case 'meat':
-        this.renderMeat(ctx);
-        break;
-      case 'treat':
-        this.renderTreat(ctx);
-        break;
-      case 'special':
-        this.renderSpecial(ctx);
-        break;
-      default:
-        this.renderBone(ctx);
+    // 이미지가 로드되어 있으면 사용
+    const img = Food.imageCache.get(this.type.id);
+    if (img) {
+      ctx.drawImage(img, 0, 0, this.width, this.height);
+    } else {
+      // 폴백: 픽셀 아트 렌더링
+      switch (this.type.id) {
+        case 'bone':
+          this.renderBone(ctx);
+          break;
+        case 'fish':
+          this.renderFish(ctx);
+          break;
+        case 'meat':
+          this.renderMeat(ctx);
+          break;
+        case 'snack':
+          this.renderSnack(ctx);
+          break;
+        case 'special':
+          this.renderSpecial(ctx);
+          break;
+        default:
+          this.renderBone(ctx);
+      }
     }
 
     ctx.restore();
@@ -141,7 +167,7 @@ export class Food {
     ctx.fillRect(11, 7, 2, 2);
   }
 
-  private renderTreat(ctx: CanvasRenderingContext2D): void {
+  private renderSnack(ctx: CanvasRenderingContext2D): void {
     // 간식 (갈색 과자)
     ctx.fillStyle = '#D2691E';
 

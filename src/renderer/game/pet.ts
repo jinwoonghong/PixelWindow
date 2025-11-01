@@ -40,11 +40,31 @@ export class Pet {
   targetX: number = 0;
   targetY: number = 0;
 
+  // 스프라이트 이미지
+  private spriteImage: HTMLImageElement | null = null;
+  private spriteLoaded: boolean = false;
+
   constructor(x: number, y: number) {
     this.x = x;
     this.y = y;
     this.targetX = x;
     this.targetY = y;
+    this.loadSprite();
+  }
+
+  private loadSprite(): void {
+    const levelKey = `level${this.level}`;
+    const img = new Image();
+    img.onload = () => {
+      this.spriteImage = img;
+      this.spriteLoaded = true;
+      console.log(`Pet sprite ${levelKey} loaded`);
+    };
+    img.onerror = () => {
+      console.warn(`Failed to load sprite for ${levelKey}, using pixel art fallback`);
+      this.spriteLoaded = false;
+    };
+    img.src = `assets/sprites/dog/dog_${levelKey}.png`;
   }
 
   update(deltaTime: number, screenWidth: number, screenHeight: number): void {
@@ -219,34 +239,71 @@ export class Pet {
     ctx.save();
     ctx.scale(scale, scale);
 
-    switch (this.state) {
-      case 'idle':
-        this.renderIdle(ctx, size, frame);
-        break;
-      case 'walking':
-      case 'running':
-        this.renderWalking(ctx, size, frame);
-        break;
-      case 'sitting':
-        this.renderSitting(ctx, size);
-        break;
-      case 'sleeping':
-        this.renderSleeping(ctx, size, frame);
-        break;
-      case 'eating':
-        this.renderEating(ctx, size, frame);
-        break;
-      case 'jumping':
-        this.renderJumping(ctx, size);
-        break;
-      default:
-        this.renderIdle(ctx, size, frame);
+    // 스프라이트 이미지가 로드되어 있으면 사용
+    if (this.spriteLoaded && this.spriteImage) {
+      this.renderFromSpriteSheet(ctx, size, frame);
+    } else {
+      // 폴백: 픽셀 아트 렌더링
+      switch (this.state) {
+        case 'idle':
+          this.renderIdle(ctx, size, frame);
+          break;
+        case 'walking':
+        case 'running':
+          this.renderWalking(ctx, size, frame);
+          break;
+        case 'sitting':
+          this.renderSitting(ctx, size);
+          break;
+        case 'sleeping':
+          this.renderSleeping(ctx, size, frame);
+          break;
+        case 'eating':
+          this.renderEating(ctx, size, frame);
+          break;
+        case 'jumping':
+          this.renderJumping(ctx, size);
+          break;
+        default:
+          this.renderIdle(ctx, size, frame);
+      }
     }
 
     // 액세서리 렌더링
     this.renderAccessories(ctx, size, scale);
 
     ctx.restore();
+  }
+
+  private renderFromSpriteSheet(ctx: CanvasRenderingContext2D, size: number, frame: number): void {
+    if (!this.spriteImage) return;
+
+    // 스프라이트 시트 구조: 4열 × 7행
+    const cellSize = size;
+    const cols = 4;
+
+    // 상태에 따른 행 결정
+    const stateRowMap: Record<PetAnimationState, number> = {
+      'idle': 0,
+      'walking': 1,
+      'running': 2,
+      'eating': 3,
+      'sleeping': 4,
+      'sitting': 5,
+      'jumping': 6
+    };
+
+    const row = stateRowMap[this.state] || 0;
+    const col = frame % cols;
+
+    // 스프라이트 시트에서 해당 프레임 추출
+    ctx.drawImage(
+      this.spriteImage,
+      col * cellSize, row * cellSize,  // source x, y
+      cellSize, cellSize,              // source width, height
+      0, 0,                            // dest x, y
+      cellSize, cellSize               // dest width, height
+    );
   }
 
   private renderAccessories(ctx: CanvasRenderingContext2D, size: number, scale: number): void {
@@ -630,6 +687,9 @@ export class Pet {
       this.width = levelData.size;
       this.height = levelData.size;
     }
+
+    // 새로운 레벨의 스프라이트 로드
+    this.loadSprite();
 
     // 알림
     if (typeof window !== 'undefined' && window.api) {

@@ -49,9 +49,9 @@ export const FOOD_TYPES = [
     spawnWeight: 5
   },
   {
-    id: 'treat',
+    id: 'snack',
     name: '간식',
-    sprite: 'treat.png',
+    sprite: 'snack.png',
     experience: 5,
     hunger: 10,
     happiness: 30,

@@ -45,6 +45,13 @@ const rendererConfig = {
       {
         test: /\.css$/,
         use: ['style-loader', 'css-loader']
+      },
+      {
+        test: /\.(png|jpg|jpeg|gif|svg)$/i,
+        type: 'asset/resource',
+        generator: {
+          filename: 'assets/[name][ext]'
+        }
       }
     ]
   },
@@ -54,7 +61,8 @@ const rendererConfig = {
   plugins: [
     new CopyWebpackPlugin({
       patterns: [
-        { from: 'src/renderer/index.html', to: 'index.html' }
+        { from: 'src/renderer/index.html', to: 'index.html' },
+        { from: 'src/assets/sprites', to: 'assets/sprites', noErrorOnMissing: true }
       ]
     })
   ]
