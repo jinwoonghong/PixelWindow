@@ -163,7 +163,7 @@ export const ACCESSORIES = [
     unlockRequirement: {
       type: 'food' as const,
       value: 30,
-      foodId: 'treat'
+      foodId: 'snack'
     },
     renderOffset: { x: 2, y: -4 }
   },

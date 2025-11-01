@@ -64,8 +64,31 @@ setInterval(updateDebugInfo, 16);
 
 // 클릭 통과 기능: 마우스가 강아지 위에 있을 때만 클릭 가능
 let isOverPet = false;
+let clickThroughEnabled = false;
+
+// 초기 상태: 클릭 가능하게 설정 (안전장치)
+if (window.api) {
+  window.api.setClickable();
+  clickThroughEnabled = false;
+}
+
+// 게임 시작 후 1초 뒤에 클릭 통과 활성화
+setTimeout(() => {
+  clickThroughEnabled = true;
+}, 1000);
 
 window.addEventListener('mousemove', (e) => {
+  if (!clickThroughEnabled) return;
+
+  // 메뉴나 모달이 열려있으면 항상 클릭 가능
+  if (menu.classList.contains('visible') || customizeModal.classList.contains('visible')) {
+    if (!isOverPet) {
+      isOverPet = true;
+      window.api.setClickable();
+    }
+    return;
+  }
+
   const pet = gameEngine.getPet();
   const petBounds = pet.getBounds();
   const mouseOverPet = collisionDetector.checkPointInRect(e.clientX, e.clientY, petBounds);
