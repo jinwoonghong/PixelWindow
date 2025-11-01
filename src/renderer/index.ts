@@ -117,25 +117,17 @@ canvas.addEventListener('click', (e) => {
     if (menu.classList.contains('visible')) {
       menu.classList.remove('visible');
     } else {
-      // 메뉴 위치 조정 (화면 밖으로 나가지 않도록)
-      let menuX = e.clientX;
-      let menuY = e.clientY;
+      // 메뉴를 화면 우하단 고정 위치에 표시
+      const menuWidth = 160;
+      const menuHeight = 240;
+      const margin = 20;
 
-      const menuWidth = 200;
-      const menuHeight = 250;
-
-      if (menuX + menuWidth > window.innerWidth) {
-        menuX = window.innerWidth - menuWidth - 10;
-      }
-      if (menuY + menuHeight > window.innerHeight) {
-        menuY = window.innerHeight - menuHeight - 10;
-      }
-
-      menu.style.left = `${menuX}px`;
-      menu.style.top = `${menuY}px`;
+      menu.style.right = `${margin}px`;
+      menu.style.bottom = `${margin}px`;
+      menu.style.left = 'auto';
+      menu.style.top = 'auto';
       menu.classList.add('visible');
 
-      // 메뉴 정보 업데이트
       updateMenu();
     }
   } else {

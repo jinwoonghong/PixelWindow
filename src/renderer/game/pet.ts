@@ -53,31 +53,11 @@ export class Pet {
   }
 
   private updatePhysics(screenWidth: number, screenHeight: number): void {
-    // 중력 적용
-    if (!this.onGround) {
-      this.velocityY += 0.5;
-    }
-
     // 속도 적용
     this.x += this.velocityX;
     this.y += this.velocityY;
 
-    // 지면 충돌
-    const groundY = screenHeight - this.height - 10;
-    if (this.y >= groundY) {
-      this.y = groundY;
-      this.velocityY = 0;
-      this.onGround = true;
-
-      // 착지 시 상태 변경
-      if (this.state === 'jumping') {
-        this.state = 'idle';
-      }
-    } else {
-      this.onGround = false;
-    }
-
-    // 벽 충돌
+    // X축 경계
     if (this.x <= 0) {
       this.x = 0;
       this.velocityX = 0;
@@ -89,16 +69,34 @@ export class Pet {
       this.direction = 'left';
     }
 
-    // 마찰
+    // Y축 경계
+    if (this.y <= 0) {
+      this.y = 0;
+      this.velocityY = 0;
+    }
+    if (this.y >= screenHeight - this.height) {
+      this.y = screenHeight - this.height;
+      this.velocityY = 0;
+    }
+
+    // 마찰 (X축과 Y축 모두)
     this.velocityX *= 0.8;
+    this.velocityY *= 0.8;
 
     // 거의 정지했으면 완전히 멈춤
     if (Math.abs(this.velocityX) < 0.1) {
       this.velocityX = 0;
+    }
+    if (Math.abs(this.velocityY) < 0.1) {
+      this.velocityY = 0;
+    }
+    if (this.velocityX === 0 && this.velocityY === 0) {
       if (this.state === 'walking' || this.state === 'running') {
         this.state = 'idle';
       }
     }
+
+    this.onGround = false;
   }
 
   private updateAnimation(deltaTime: number): void {
@@ -130,36 +128,38 @@ export class Pet {
       // 랜덤 행동 선택
       const rand = Math.random();
 
-      if (rand < 0.3) {
-        // 30%: 랜덤 위치로 이동
+      if (rand < 0.5) {
+        // 50%: 랜덤 위치로 이동 (2D 평면)
         this.targetX = Math.random() * (screenWidth - this.width);
+        this.targetY = Math.random() * (screenHeight - this.height);
         this.state = 'walking';
-      } else if (rand < 0.5) {
-        // 20%: 점프
-        if (this.onGround) {
-          this.jump();
-        }
       } else if (rand < 0.7) {
         // 20%: 앉기
         this.state = 'sitting';
         this.velocityX = 0;
+        this.velocityY = 0;
       } else {
         // 30%: 가만히 서있기
         this.state = 'idle';
         this.velocityX = 0;
+        this.velocityY = 0;
       }
     }
 
-    // 목표 위치로 이동
+    // 목표 위치로 이동 (2D)
     if (this.state === 'walking' || this.state === 'running') {
-      const distToTarget = this.targetX - this.x;
+      const distX = this.targetX - this.x;
+      const distY = this.targetY - this.y;
+      const totalDist = Math.sqrt(distX * distX + distY * distY);
 
-      if (Math.abs(distToTarget) > 5) {
+      if (totalDist > 5) {
         const speed = this.state === 'running' ? 3 : 1.5;
-        this.velocityX = Math.sign(distToTarget) * speed;
-        this.direction = distToTarget > 0 ? 'right' : 'left';
+        this.velocityX = (distX / totalDist) * speed;
+        this.velocityY = (distY / totalDist) * speed;
+        this.direction = distX > 0 ? 'right' : 'left';
       } else {
         this.velocityX = 0;
+        this.velocityY = 0;
         this.state = 'idle';
       }
     }
@@ -641,11 +641,7 @@ export class Pet {
   }
 
   jump(): void {
-    if (this.onGround) {
-      this.velocityY = -12;
-      this.onGround = false;
-      this.state = 'jumping';
-    }
+    // 2D 평면 모드에서는 점프 기능 비활성화
   }
 
   // 액세서리 관련 메서드

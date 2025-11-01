@@ -188,9 +188,8 @@ export class GameEngine {
   }
 
   spawnRandomFood(): void {
-    // 랜덤 위치 (화면 안쪽)
     const x = 50 + Math.random() * (this.canvas.width - 100);
-    const y = 50 + Math.random() * (this.canvas.height - 200);
+    const y = 50 + Math.random() * (this.canvas.height - 100);
 
     const food = Food.createRandom(x, y);
     this.foods.push(food);
@@ -200,7 +199,7 @@ export class GameEngine {
 
   spawnFood(foodId: string): void {
     const x = 50 + Math.random() * (this.canvas.width - 100);
-    const y = 50 + Math.random() * (this.canvas.height - 200);
+    const y = 50 + Math.random() * (this.canvas.height - 100);
 
     const food = Food.createById(foodId, x, y);
     if (food) {
