@@ -1,0 +1,142 @@
+PixelWindow 이미지 제작 체크리스트
+=====================================
+
+📌 최우선 순위 (핵심 기능)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+강아지 기본 스프라이트:
+[ ] dog_level1.png (128×224px, 32px 셀)
+
+먹이 아이템 (각 16×16px):
+[ ] bone.png (뼈다귀)
+[ ] fish.png (생선)
+[ ] meat.png (고기)
+[ ] snack.png (간식)
+[ ] special.png (특별식)
+
+⭐ 위 6개만 있으면 게임 기본 작동 가능!
+
+
+📌 추가 강아지 크기 (레벨업 시스템)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[ ] dog_level2.png (192×336px, 48px 셀)
+[ ] dog_level3.png (256×448px, 64px 셀)
+
+
+📌 액세서리 - 모자 (각 3크기: 32/48/64px)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[ ] red_hat_32.png
+[ ] red_hat_48.png
+[ ] red_hat_64.png
+
+[ ] blue_hat_32.png
+[ ] blue_hat_48.png
+[ ] blue_hat_64.png
+
+[ ] party_hat_32.png
+[ ] party_hat_48.png
+[ ] party_hat_64.png
+
+
+📌 액세서리 - 목걸이 (각 3크기)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[ ] simple_necklace_32.png
+[ ] simple_necklace_48.png
+[ ] simple_necklace_64.png
+
+[ ] gold_necklace_32.png
+[ ] gold_necklace_48.png
+[ ] gold_necklace_64.png
+
+
+📌 액세서리 - 안경 (각 3크기)
+━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[ ] sunglasses_32.png
+[ ] sunglasses_48.png
+[ ] sunglasses_64.png
+
+[ ] round_glasses_32.png
+[ ] round_glasses_48.png
+[ ] round_glasses_64.png
+
+
+📌 액세서리 - 리본 (각 3크기)
+━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[ ] pink_ribbon_32.png
+[ ] pink_ribbon_48.png
+[ ] pink_ribbon_64.png
+
+[ ] red_ribbon_32.png
+[ ] red_ribbon_48.png
+[ ] red_ribbon_64.png
+
+
+📌 액세서리 - 스카프 (각 3크기)
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[ ] blue_scarf_32.png
+[ ] blue_scarf_48.png
+[ ] blue_scarf_64.png
+
+[ ] yellow_scarf_32.png
+[ ] yellow_scarf_48.png
+[ ] yellow_scarf_64.png
+
+
+📌 액세서리 - 나비 넥타이 (각 3크기)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[ ] black_bow_32.png
+[ ] black_bow_48.png
+[ ] black_bow_64.png
+
+[ ] red_bow_32.png
+[ ] red_bow_48.png
+[ ] red_bow_64.png
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📊 통계
+━━━━━━
+
+총 필요 파일: 47개
+  - 강아지 스프라이트: 3개
+  - 먹이: 5개
+  - 액세서리: 39개 (13종 × 3크기)
+
+최소 필수: 6개 (dog_level1 + 먹이 5종)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📋 제작 순서 추천
+━━━━━━━━━━━━━━
+
+1단계: dog_level1.png (스타일 확인용 샘플)
+2단계: 먹이 5종 (bone, fish, meat, snack, special)
+       → 여기까지 완성되면 게임 플레이 가능!
+
+3단계: dog_level2.png, dog_level3.png
+       → 레벨업 시스템 완성
+
+4단계: 액세서리 (원하는 것부터 선택적으로)
+       → 꾸미기 기능 완성
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ 품질 체크리스트
+━━━━━━━━━━━━━━
+
+각 이미지 완성 후 확인:
+[ ] 크기가 정확한가? (픽셀 단위로)
+[ ] 배경이 투명한가? (PNG 알파 채널)
+[ ] 픽셀 아트 스타일인가? (안티앨리어싱 없음)
+[ ] 파일명이 정확한가?
+[ ] 윤곽선이 명확한가?
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
