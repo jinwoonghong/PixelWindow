@@ -51,10 +51,14 @@ function updateDebugInfo(): void {
     const pet = gameEngine.getPet();
     const petXElement = document.getElementById('petX');
     const petYElement = document.getElementById('petY');
+    const petVXElement = document.getElementById('petVX');
+    const petVYElement = document.getElementById('petVY');
     const petStateElement = document.getElementById('petState');
 
     if (petXElement) petXElement.textContent = Math.floor(pet.x).toString();
     if (petYElement) petYElement.textContent = Math.floor(pet.y).toString();
+    if (petVXElement) petVXElement.textContent = pet.velocityX.toFixed(2);
+    if (petVYElement) petVYElement.textContent = pet.velocityY.toFixed(2);
     if (petStateElement) petStateElement.textContent = pet.state;
   }
 }

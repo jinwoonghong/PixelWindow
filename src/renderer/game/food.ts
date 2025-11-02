@@ -56,12 +56,13 @@ export class Food {
       return;
     }
 
-    // 떠있는 애니메이션
-    this.bobOffset = Math.sin(now * this.bobSpeed) * 3;
+    // 떠있는 애니메이션 제거 (고정)
+    this.bobOffset = 0;
   }
 
   render(ctx: CanvasRenderingContext2D): void {
-    const renderY = this.y + this.bobOffset;
+    // bobOffset 제거 - 고정 위치
+    const renderY = this.y;
 
     ctx.save();
     ctx.translate(this.x, renderY);
