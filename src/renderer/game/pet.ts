@@ -59,10 +59,14 @@ export class Pet {
     img.onload = () => {
       this.spriteImage = img;
       this.spriteLoaded = true;
-      console.log(`Pet sprite ${levelKey} loaded`);
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`Pet sprite ${levelKey} loaded`);
+      }
     };
     img.onerror = () => {
-      console.warn(`Failed to load sprite for ${levelKey}, using pixel art fallback`);
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`Failed to load sprite for ${levelKey}, using pixel art fallback`);
+      }
       this.spriteLoaded = false;
     };
     img.src = `assets/sprites/dog/dog_${levelKey}.png`;
@@ -80,31 +84,33 @@ export class Pet {
     this.x += this.velocityX;
     this.y += this.velocityY;
 
-    // X축 경계
+    // X축 경계 - 경계에 닿으면 즉시 새 목표 설정
+    let hitBoundary = false;
     if (this.x <= 0) {
       this.x = 0;
-      this.velocityX = 0;
       this.direction = 'right';
+      hitBoundary = true;
     }
     if (this.x >= screenWidth - this.width) {
       this.x = screenWidth - this.width;
-      this.velocityX = 0;
       this.direction = 'left';
+      hitBoundary = true;
     }
 
     // Y축 경계
     if (this.y <= 0) {
       this.y = 0;
-      this.velocityY = 0;
+      hitBoundary = true;
     }
     if (this.y >= screenHeight - this.height) {
       this.y = screenHeight - this.height;
-      this.velocityY = 0;
+      hitBoundary = true;
     }
 
-    // 마찰 제거 - 일정한 속도 유지
-    // this.velocityX *= 0.8;
-    // this.velocityY *= 0.8;
+    // 경계에 닿으면 즉시 새 행동 선택
+    if (hitBoundary) {
+      this.aiTimer = this.aiDelay;
+    }
 
     this.onGround = false;
   }
@@ -156,7 +162,9 @@ export class Pet {
         }
 
         this.state = 'walking';
-        console.log(`New target: (${Math.floor(this.targetX)}, ${Math.floor(this.targetY)}), Current: (${Math.floor(this.x)}, ${Math.floor(this.y)})`);
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`New target: (${Math.floor(this.targetX)}, ${Math.floor(this.targetY)}), Current: (${Math.floor(this.x)}, ${Math.floor(this.y)})`);
+        }
       } else if (rand < 0.85) {
         // 15%: 앉기
         this.state = 'sitting';
@@ -183,8 +191,8 @@ export class Pet {
         this.velocityY = (distY / totalDist) * baseSpeed * 0.2; // Y축은 20% 속도
         this.direction = distX > 0 ? 'right' : 'left';
 
-        // 디버그 로그
-        if (Math.random() < 0.01) {
+        // 디버그 로그 (개발 모드에서만)
+        if (process.env.NODE_ENV === 'development' && Math.random() < 0.01) {
           console.log(`Moving: velocity=(${this.velocityX.toFixed(2)}, ${this.velocityY.toFixed(2)}), pos=(${Math.floor(this.x)}, ${Math.floor(this.y)})`);
         }
       } else {
@@ -698,7 +706,9 @@ export class Pet {
       );
     }
 
-    console.log(`Pet leveled up to ${this.level}!`);
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Pet leveled up to ${this.level}!`);
+    }
   }
 
   jump(): void {

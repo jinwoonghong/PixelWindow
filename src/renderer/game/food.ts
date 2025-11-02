@@ -36,10 +36,14 @@ export class Food {
     img.onload = () => {
       Food.imageCache.set(foodId, img);
       Food.imagesLoaded.add(foodId);
-      console.log(`Food image ${foodId} loaded`);
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`Food image ${foodId} loaded`);
+      }
     };
     img.onerror = () => {
-      console.warn(`Failed to load food image ${foodId}, using pixel art fallback`);
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`Failed to load food image ${foodId}, using pixel art fallback`);
+      }
     };
     img.src = `assets/sprites/food/${foodId}.png`;
   }
