@@ -33,6 +33,7 @@ export class Pet {
   currentFrame: number = 0;
   frameTimer: number = 0;
   frameDelay: number = 200; // ms (애니메이션 속도 느리게)
+  maxFrames: number = 5; // 스프라이트 시트의 열 개수
 
   // AI
   aiTimer: number = 0;
@@ -101,22 +102,9 @@ export class Pet {
       this.velocityY = 0;
     }
 
-    // 마찰 (X축과 Y축 모두)
-    this.velocityX *= 0.8;
-    this.velocityY *= 0.8;
-
-    // 거의 정지했으면 완전히 멈춤
-    if (Math.abs(this.velocityX) < 0.1) {
-      this.velocityX = 0;
-    }
-    if (Math.abs(this.velocityY) < 0.1) {
-      this.velocityY = 0;
-    }
-    if (this.velocityX === 0 && this.velocityY === 0) {
-      if (this.state === 'walking' || this.state === 'running') {
-        this.state = 'idle';
-      }
-    }
+    // 마찰 제거 - 일정한 속도 유지
+    // this.velocityX *= 0.8;
+    // this.velocityY *= 0.8;
 
     this.onGround = false;
   }
@@ -125,7 +113,7 @@ export class Pet {
     this.frameTimer += deltaTime;
 
     if (this.frameTimer >= this.frameDelay) {
-      this.currentFrame = (this.currentFrame + 1) % 4;
+      this.currentFrame = (this.currentFrame + 1) % this.maxFrames;
       this.frameTimer = 0;
     }
   }
@@ -154,27 +142,28 @@ export class Pet {
       // 랜덤 행동 선택
       const rand = Math.random();
 
-      if (rand < 0.6) {
-        // 60%: 좌우로 걷기 (방치형 게임 - 주로 화면 하단)
+      if (rand < 0.7) {
+        // 70%: 좌우로 걷기 (방치형 게임 - 주로 화면 하단)
         this.targetX = Math.random() * (screenWidth - this.width);
 
-        // 대부분 화면 하단에 머무름 (하단 20% 영역)
+        // 대부분 화면 하단에 머무름 (하단 영역)
         if (Math.random() < 0.8) {
           // 80% 확률로 하단 영역
-          this.targetY = screenHeight - 100 - Math.random() * 50;
+          this.targetY = screenHeight - 150 - Math.random() * 100;
         } else {
           // 20% 확률로 중간 정도까지 올라감
           this.targetY = screenHeight * 0.5 + Math.random() * (screenHeight * 0.3);
         }
 
         this.state = 'walking';
-      } else if (rand < 0.75) {
+        console.log(`New target: (${Math.floor(this.targetX)}, ${Math.floor(this.targetY)}), Current: (${Math.floor(this.x)}, ${Math.floor(this.y)})`);
+      } else if (rand < 0.85) {
         // 15%: 앉기
         this.state = 'sitting';
         this.velocityX = 0;
         this.velocityY = 0;
       } else {
-        // 25%: 가만히 서있기
+        // 15%: 가만히 서있기
         this.state = 'idle';
         this.velocityX = 0;
         this.velocityY = 0;
@@ -187,16 +176,20 @@ export class Pet {
       const distY = this.targetY - this.y;
       const totalDist = Math.sqrt(distX * distX + distY * distY);
 
-      if (totalDist > 10) {
+      if (totalDist > 20) {
         // X축은 정상 속도, Y축은 매우 느리게 (부드러운 이동)
-        const baseSpeed = 2.5; // 속도 증가
+        const baseSpeed = 3; // 속도 더 증가
         this.velocityX = (distX / totalDist) * baseSpeed;
-        this.velocityY = (distY / totalDist) * baseSpeed * 0.3; // Y축은 30% 속도
+        this.velocityY = (distY / totalDist) * baseSpeed * 0.2; // Y축은 20% 속도
         this.direction = distX > 0 ? 'right' : 'left';
+
+        // 디버그 로그
+        if (Math.random() < 0.01) {
+          console.log(`Moving: velocity=(${this.velocityX.toFixed(2)}, ${this.velocityY.toFixed(2)}), pos=(${Math.floor(this.x)}, ${Math.floor(this.y)})`);
+        }
       } else {
-        this.velocityX = 0;
-        this.velocityY = 0;
-        this.state = 'idle';
+        // 목표 도착 - 새로운 목표 설정
+        this.aiTimer = this.aiDelay; // 즉시 새 행동 선택
       }
     }
   }
@@ -283,20 +276,20 @@ export class Pet {
   private renderFromSpriteSheet(ctx: CanvasRenderingContext2D, size: number, frame: number): void {
     if (!this.spriteImage) return;
 
-    // 스프라이트 시트 구조: 4열 × 7행
+    // 스프라이트 시트 구조: 5열 × 4행
     // 원본 이미지의 각 셀 크기 (실제 이미지 파일의 크기)
     const sourceCellSize = 32; // dog_level1.png의 각 프레임 크기
-    const cols = 4;
+    const cols = 5;
 
-    // 상태에 따른 행 결정
+    // 상태에 따른 행 결정 (이미지 구조에 맞춤)
     const stateRowMap: Record<PetAnimationState, number> = {
-      'idle': 0,
-      'walking': 1,
-      'running': 2,
-      'eating': 3,
-      'sleeping': 4,
-      'sitting': 5,
-      'jumping': 6
+      'idle': 0,        // 1행: 서있기
+      'walking': 1,     // 2행: 걷기
+      'running': 1,     // 2행: 걷기 (running도 walking 사용)
+      'eating': 2,      // 3행: 먹기
+      'sitting': 3,     // 4행: 앉기
+      'sleeping': 3,    // 4행: 앉기 (sleeping도 sitting 사용)
+      'jumping': 1      // 2행: 걷기
     };
 
     const row = stateRowMap[this.state] || 0;
