@@ -13,8 +13,8 @@ export class Pet {
   onGround: boolean = false;
 
   // 크기
-  width: number = 32;
-  height: number = 32;
+  width: number = 64;
+  height: number = 64;
 
   // 상태
   state: PetAnimationState = 'idle';
@@ -32,11 +32,11 @@ export class Pet {
   // 애니메이션
   currentFrame: number = 0;
   frameTimer: number = 0;
-  frameDelay: number = 100; // ms
+  frameDelay: number = 200; // ms (애니메이션 속도 느리게)
 
   // AI
   aiTimer: number = 0;
-  aiDelay: number = 2000; // ms
+  aiDelay: number = 3000; // ms (행동 변경 주기)
   targetX: number = 0;
   targetY: number = 0;
 
@@ -187,9 +187,9 @@ export class Pet {
       const distY = this.targetY - this.y;
       const totalDist = Math.sqrt(distX * distX + distY * distY);
 
-      if (totalDist > 5) {
+      if (totalDist > 10) {
         // X축은 정상 속도, Y축은 매우 느리게 (부드러운 이동)
-        const baseSpeed = 1.5;
+        const baseSpeed = 2.5; // 속도 증가
         this.velocityX = (distX / totalDist) * baseSpeed;
         this.velocityY = (distY / totalDist) * baseSpeed * 0.3; // Y축은 30% 속도
         this.direction = distX > 0 ? 'right' : 'left';
@@ -246,13 +246,6 @@ export class Pet {
     const size = this.width;
     const frame = Math.floor(this.currentFrame);
 
-    // 크기는 레벨에 따라 조정
-    const levelData = LEVEL_REQUIREMENTS.find(l => l.level === this.level);
-    const scale = levelData ? levelData.size / 32 : 1;
-
-    ctx.save();
-    ctx.scale(scale, scale);
-
     // 스프라이트 이미지가 로드되어 있으면 사용
     if (this.spriteLoaded && this.spriteImage) {
       this.renderFromSpriteSheet(ctx, size, frame);
@@ -284,16 +277,15 @@ export class Pet {
     }
 
     // 액세서리 렌더링
-    this.renderAccessories(ctx, size, scale);
-
-    ctx.restore();
+    this.renderAccessories(ctx, size, 1);
   }
 
   private renderFromSpriteSheet(ctx: CanvasRenderingContext2D, size: number, frame: number): void {
     if (!this.spriteImage) return;
 
     // 스프라이트 시트 구조: 4열 × 7행
-    const cellSize = size;
+    // 원본 이미지의 각 셀 크기 (실제 이미지 파일의 크기)
+    const sourceCellSize = 32; // dog_level1.png의 각 프레임 크기
     const cols = 4;
 
     // 상태에 따른 행 결정
@@ -310,13 +302,13 @@ export class Pet {
     const row = stateRowMap[this.state] || 0;
     const col = frame % cols;
 
-    // 스프라이트 시트에서 해당 프레임 추출
+    // 스프라이트 시트에서 해당 프레임 추출하여 확대해서 그리기
     ctx.drawImage(
       this.spriteImage,
-      col * cellSize, row * cellSize,  // source x, y
-      cellSize, cellSize,              // source width, height
-      0, 0,                            // dest x, y
-      cellSize, cellSize               // dest width, height
+      col * sourceCellSize, row * sourceCellSize,  // source x, y
+      sourceCellSize, sourceCellSize,              // source width, height
+      0, 0,                                        // dest x, y
+      size, size                                   // dest width, height (확대)
     );
   }
 

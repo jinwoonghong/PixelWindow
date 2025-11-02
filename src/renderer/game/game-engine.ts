@@ -55,8 +55,8 @@ export class GameEngine {
 
     // Pet 생성 (화면 중앙 하단)
     this.pet = new Pet(
-      this.canvas.width / 2 - 16,
-      this.canvas.height - 100
+      this.canvas.width / 2 - 32,
+      this.canvas.height - 150
     );
 
     this.collisionDetector = new CollisionDetector();

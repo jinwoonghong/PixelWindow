@@ -10,8 +10,8 @@ export class Food {
   spawnTime: number;
   lifetime: number = 60000; // 60초
 
-  width: number = 16;
-  height: number = 16;
+  width: number = 32;
+  height: number = 32;
 
   // 애니메이션
   bobOffset: number = 0;
@@ -62,10 +62,10 @@ export class Food {
     ctx.save();
     ctx.translate(this.x, renderY);
 
-    // 이미지가 로드되어 있으면 사용
+    // 이미지가 로드되어 있으면 사용 (원본 16px를 32px로 확대)
     const img = Food.imageCache.get(this.type.id);
     if (img) {
-      ctx.drawImage(img, 0, 0, this.width, this.height);
+      ctx.drawImage(img, 0, 0, 16, 16, 0, 0, this.width, this.height);
     } else {
       // 폴백: 픽셀 아트 렌더링
       switch (this.type.id) {

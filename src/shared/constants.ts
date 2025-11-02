@@ -4,8 +4,8 @@ export const GAME_CONFIG = {
   FPS: 60,
   CANVAS_WIDTH: 1920,
   CANVAS_HEIGHT: 1080,
-  PET_SIZE: 32,
-  FOOD_SIZE: 16,
+  PET_SIZE: 64,
+  FOOD_SIZE: 32,
 };
 
 export const PHYSICS = {
@@ -15,9 +15,9 @@ export const PHYSICS = {
 };
 
 export const LEVEL_REQUIREMENTS = [
-  { level: 1, expRequired: 0, size: 16 },
-  { level: 2, expRequired: 100, size: 24 },
-  { level: 3, expRequired: 300, size: 32 },
+  { level: 1, expRequired: 0, size: 64 },
+  { level: 2, expRequired: 100, size: 80 },
+  { level: 3, expRequired: 300, size: 96 },
 ];
 
 export const FOOD_TYPES = [
