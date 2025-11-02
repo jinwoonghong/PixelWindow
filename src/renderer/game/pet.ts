@@ -162,19 +162,20 @@ export class Pet {
         }
 
         this.state = 'walking';
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`New target: (${Math.floor(this.targetX)}, ${Math.floor(this.targetY)}), Current: (${Math.floor(this.x)}, ${Math.floor(this.y)})`);
-        }
+        // 항상 로그 출력 (임시 디버깅)
+        console.log(`[AI] New target: (${Math.floor(this.targetX)}, ${Math.floor(this.targetY)}), Current: (${Math.floor(this.x)}, ${Math.floor(this.y)}), Screen: ${screenWidth}x${screenHeight}`);
       } else if (rand < 0.85) {
         // 15%: 앉기
         this.state = 'sitting';
         this.velocityX = 0;
         this.velocityY = 0;
+        console.log(`[AI] Sitting`);
       } else {
         // 15%: 가만히 서있기
         this.state = 'idle';
         this.velocityX = 0;
         this.velocityY = 0;
+        console.log(`[AI] Idle`);
       }
     }
 
@@ -191,12 +192,13 @@ export class Pet {
         this.velocityY = (distY / totalDist) * baseSpeed * 0.2; // Y축은 20% 속도
         this.direction = distX > 0 ? 'right' : 'left';
 
-        // 디버그 로그 (개발 모드에서만)
-        if (process.env.NODE_ENV === 'development' && Math.random() < 0.01) {
-          console.log(`Moving: velocity=(${this.velocityX.toFixed(2)}, ${this.velocityY.toFixed(2)}), pos=(${Math.floor(this.x)}, ${Math.floor(this.y)})`);
+        // 항상 로그 출력 (임시 디버깅)
+        if (Math.random() < 0.01) {
+          console.log(`[MOVE] velocity=(${this.velocityX.toFixed(2)}, ${this.velocityY.toFixed(2)}), pos=(${Math.floor(this.x)}, ${Math.floor(this.y)}), dist=${Math.floor(totalDist)}`);
         }
       } else {
         // 목표 도착 - 새로운 목표 설정
+        console.log(`[MOVE] Reached target, selecting new target`);
         this.aiTimer = this.aiDelay; // 즉시 새 행동 선택
       }
     }
@@ -285,9 +287,15 @@ export class Pet {
     if (!this.spriteImage) return;
 
     // 스프라이트 시트 구조: 5열 × 4행
-    // 원본 이미지의 각 셀 크기 (실제 이미지 파일의 크기)
-    const sourceCellSize = 32; // dog_level1.png의 각 프레임 크기
+    // 원본 이미지 크기: 1024 × 1024
+    const imageWidth = this.spriteImage.width;  // 1024
+    const imageHeight = this.spriteImage.height; // 1024
     const cols = 5;
+    const rows = 4;
+
+    // 각 셀의 실제 크기
+    const cellWidth = imageWidth / cols;   // 204.8
+    const cellHeight = imageHeight / rows; // 256
 
     // 상태에 따른 행 결정 (이미지 구조에 맞춤)
     const stateRowMap: Record<PetAnimationState, number> = {
@@ -306,10 +314,10 @@ export class Pet {
     // 스프라이트 시트에서 해당 프레임 추출하여 확대해서 그리기
     ctx.drawImage(
       this.spriteImage,
-      col * sourceCellSize, row * sourceCellSize,  // source x, y
-      sourceCellSize, sourceCellSize,              // source width, height
-      0, 0,                                        // dest x, y
-      size, size                                   // dest width, height (확대)
+      col * cellWidth, row * cellHeight,      // source x, y
+      cellWidth, cellHeight,                  // source width, height
+      0, 0,                                   // dest x, y
+      size, size                              // dest width, height (확대)
     );
   }
 

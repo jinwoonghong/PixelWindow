@@ -66,10 +66,11 @@ export class Food {
     ctx.save();
     ctx.translate(this.x, renderY);
 
-    // 이미지가 로드되어 있으면 사용 (원본 16px를 32px로 확대)
+    // 이미지가 로드되어 있으면 사용 (전체 이미지를 화면 크기로 축소)
     const img = Food.imageCache.get(this.type.id);
     if (img) {
-      ctx.drawImage(img, 0, 0, 16, 16, 0, 0, this.width, this.height);
+      // 이미지 전체(1024x1024)를 화면 크기(32x32)로 축소
+      ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, this.width, this.height);
     } else {
       // 폴백: 픽셀 아트 렌더링
       switch (this.type.id) {
