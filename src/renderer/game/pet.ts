@@ -134,11 +134,15 @@ export class Pet {
     // 에너지나 배고픔이 낮으면 가만히 있음
     if (this.energy < 20) {
       this.state = 'sleeping';
+      this.velocityX = 0;
+      this.velocityY = 0;
       return;
     }
 
     if (this.hunger < 30) {
       this.state = 'sitting';
+      this.velocityX = 0;
+      this.velocityY = 0;
       return;
     }
 
@@ -150,34 +154,44 @@ export class Pet {
       // 랜덤 행동 선택
       const rand = Math.random();
 
-      if (rand < 0.5) {
-        // 50%: 랜덤 위치로 이동 (2D 평면)
+      if (rand < 0.6) {
+        // 60%: 좌우로 걷기 (방치형 게임 - 주로 화면 하단)
         this.targetX = Math.random() * (screenWidth - this.width);
-        this.targetY = Math.random() * (screenHeight - this.height);
+
+        // 대부분 화면 하단에 머무름 (하단 20% 영역)
+        if (Math.random() < 0.8) {
+          // 80% 확률로 하단 영역
+          this.targetY = screenHeight - 100 - Math.random() * 50;
+        } else {
+          // 20% 확률로 중간 정도까지 올라감
+          this.targetY = screenHeight * 0.5 + Math.random() * (screenHeight * 0.3);
+        }
+
         this.state = 'walking';
-      } else if (rand < 0.7) {
-        // 20%: 앉기
+      } else if (rand < 0.75) {
+        // 15%: 앉기
         this.state = 'sitting';
         this.velocityX = 0;
         this.velocityY = 0;
       } else {
-        // 30%: 가만히 서있기
+        // 25%: 가만히 서있기
         this.state = 'idle';
         this.velocityX = 0;
         this.velocityY = 0;
       }
     }
 
-    // 목표 위치로 이동 (2D)
+    // 목표 위치로 이동 (주로 X축, Y축은 매우 느리게)
     if (this.state === 'walking' || this.state === 'running') {
       const distX = this.targetX - this.x;
       const distY = this.targetY - this.y;
       const totalDist = Math.sqrt(distX * distX + distY * distY);
 
       if (totalDist > 5) {
-        const speed = this.state === 'running' ? 3 : 1.5;
-        this.velocityX = (distX / totalDist) * speed;
-        this.velocityY = (distY / totalDist) * speed;
+        // X축은 정상 속도, Y축은 매우 느리게 (부드러운 이동)
+        const baseSpeed = 1.5;
+        this.velocityX = (distX / totalDist) * baseSpeed;
+        this.velocityY = (distY / totalDist) * baseSpeed * 0.3; // Y축은 30% 속도
         this.direction = distX > 0 ? 'right' : 'left';
       } else {
         this.velocityX = 0;

@@ -62,24 +62,24 @@ function updateDebugInfo(): void {
 // 디버그 업데이트 루프
 setInterval(updateDebugInfo, 16);
 
-// 클릭 통과 기능: 마우스가 강아지 위에 있을 때만 클릭 가능
+// 클릭 통과 기능: 마우스가 강아지/메뉴 위에 있을 때만 클릭 가능
 let isOverPet = false;
-let clickThroughEnabled = false;
+let mouseX = 0;
+let mouseY = 0;
 
-// 초기 상태: 클릭 가능하게 설정 (안전장치)
+// 마우스 위치 추적
+window.addEventListener('mousemove', (e) => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+});
+
+// 초기: 클릭 통과 활성화 (투명 영역은 클릭 통과)
 if (window.api) {
-  window.api.setClickable();
-  clickThroughEnabled = false;
+  window.api.setClickThrough();
 }
 
-// 게임 시작 후 1초 뒤에 클릭 통과 활성화
-setTimeout(() => {
-  clickThroughEnabled = true;
-}, 1000);
-
-window.addEventListener('mousemove', (e) => {
-  if (!clickThroughEnabled) return;
-
+// 주기적으로 마우스 위치 확인하여 클릭 통과 설정 (60fps)
+setInterval(() => {
   // 메뉴나 모달이 열려있으면 항상 클릭 가능
   if (menu.classList.contains('visible') || customizeModal.classList.contains('visible')) {
     if (!isOverPet) {
@@ -89,9 +89,10 @@ window.addEventListener('mousemove', (e) => {
     return;
   }
 
+  // 마우스가 강아지 위에 있는지 확인
   const pet = gameEngine.getPet();
   const petBounds = pet.getBounds();
-  const mouseOverPet = collisionDetector.checkPointInRect(e.clientX, e.clientY, petBounds);
+  const mouseOverPet = collisionDetector.checkPointInRect(mouseX, mouseY, petBounds);
 
   if (mouseOverPet !== isOverPet) {
     isOverPet = mouseOverPet;
@@ -101,7 +102,7 @@ window.addEventListener('mousemove', (e) => {
       window.api.setClickThrough();
     }
   }
-});
+}, 16); // ~60fps
 
 // 메뉴 관련
 const menu = document.getElementById('menu')!;
