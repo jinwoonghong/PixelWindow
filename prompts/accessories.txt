@@ -1,0 +1,66 @@
+# PixelWindow Accessories Prompts
+# 사용법: Stable Diffusion WebUI에서 Script → "Prompts from file or textbox" 선택 후 이 파일 로드
+
+# === 모자 (Hats) ===
+
+# 빨간 모자 (red_hat.png)
+cute pixel art red cap icon, game accessory, baseball cap, clean design, transparent background, centered, 512x512, high quality, professional game sprite, flat design, simple hat
+--negative-- background, complex, blurry, low quality, watermark, text, shadow, realistic photo
+
+# 파란 모자 (blue_hat.png)
+cute pixel art blue cap icon, game accessory, baseball cap, clean design, transparent background, centered, 512x512, high quality, professional game sprite, flat design, simple hat
+--negative-- background, complex, blurry, low quality, watermark, text, shadow, realistic photo
+
+# 파티 모자 (party_hat.png)
+cute pixel art party hat icon, game accessory, cone-shaped celebration hat, colorful stripes, clean design, transparent background, centered, 512x512, high quality, professional game sprite, flat design
+--negative-- background, complex, blurry, low quality, watermark, text, shadow, realistic photo
+
+# === 목걸이 (Necklaces) ===
+
+# 심플 목걸이 (simple_necklace.png)
+cute pixel art simple necklace icon, game accessory, basic collar, clean design, transparent background, centered, 512x512, high quality, professional game sprite, flat design
+--negative-- background, complex, blurry, low quality, watermark, text, shadow, realistic photo
+
+# 금 목걸이 (gold_necklace.png)
+cute pixel art gold necklace icon, game accessory, shiny golden collar, sparkles, clean design, transparent background, centered, 512x512, high quality, professional game sprite, flat design
+--negative-- background, complex, blurry, low quality, watermark, text, shadow, realistic photo
+
+# === 안경 (Glasses) ===
+
+# 선글라스 (sunglasses.png)
+cute pixel art sunglasses icon, game accessory, cool shades, clean design, transparent background, centered, 512x512, high quality, professional game sprite, flat design, dark lenses
+--negative-- background, complex, blurry, low quality, watermark, text, shadow, realistic photo
+
+# 동그란 안경 (round_glasses.png)
+cute pixel art round glasses icon, game accessory, circular spectacles, clean design, transparent background, centered, 512x512, high quality, professional game sprite, flat design
+--negative-- background, complex, blurry, low quality, watermark, text, shadow, realistic photo
+
+# === 리본 (Ribbons) ===
+
+# 핑크 리본 (pink_ribbon.png)
+cute pixel art pink ribbon icon, game accessory, bow ribbon, clean design, transparent background, centered, 512x512, high quality, professional game sprite, flat design, cute bow
+--negative-- background, complex, blurry, low quality, watermark, text, shadow, realistic photo
+
+# 빨간 리본 (red_ribbon.png)
+cute pixel art red ribbon icon, game accessory, bow ribbon, clean design, transparent background, centered, 512x512, high quality, professional game sprite, flat design, cute bow
+--negative-- background, complex, blurry, low quality, watermark, text, shadow, realistic photo
+
+# === 스카프 (Scarves) ===
+
+# 파란 스카프 (blue_scarf.png)
+cute pixel art blue scarf icon, game accessory, cozy scarf, clean design, transparent background, centered, 512x512, high quality, professional game sprite, flat design
+--negative-- background, complex, blurry, low quality, watermark, text, shadow, realistic photo
+
+# 노란 스카프 (yellow_scarf.png)
+cute pixel art yellow scarf icon, game accessory, bright scarf, clean design, transparent background, centered, 512x512, high quality, professional game sprite, flat design
+--negative-- background, complex, blurry, low quality, watermark, text, shadow, realistic photo
+
+# === 나비 넥타이 (Bow Ties) ===
+
+# 검은 나비 넥타이 (black_bow.png)
+cute pixel art black bow tie icon, game accessory, formal bowtie, clean design, transparent background, centered, 512x512, high quality, professional game sprite, flat design
+--negative-- background, complex, blurry, low quality, watermark, text, shadow, realistic photo
+
+# 빨간 나비 넥타이 (red_bow.png)
+cute pixel art red bow tie icon, game accessory, cute bowtie, clean design, transparent background, centered, 512x512, high quality, professional game sprite, flat design
+--negative-- background, complex, blurry, low quality, watermark, text, shadow, realistic photo
