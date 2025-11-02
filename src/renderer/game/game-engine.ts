@@ -49,6 +49,10 @@ export class GameEngine {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d')!;
 
+    // Canvas 렌더링 품질 설정
+    this.ctx.imageSmoothingEnabled = true;
+    this.ctx.imageSmoothingQuality = 'high';
+
     // Canvas 크기 설정
     this.canvas.width = window.innerWidth;
     this.canvas.height = window.innerHeight;
