@@ -125,20 +125,8 @@ export class Pet {
   }
 
   private updateAI(deltaTime: number, screenWidth: number, screenHeight: number): void {
-    // 에너지나 배고픔이 낮으면 가만히 있음
-    if (this.energy < 20) {
-      this.state = 'sleeping';
-      this.velocityX = 0;
-      this.velocityY = 0;
-      return;
-    }
-
-    if (this.hunger < 30) {
-      this.state = 'sitting';
-      this.velocityX = 0;
-      this.velocityY = 0;
-      return;
-    }
+    // 방치형 게임 - sleeping/sitting 조건 제거
+    // 항상 활동적으로 움직임
 
     this.aiTimer += deltaTime;
 
@@ -148,8 +136,8 @@ export class Pet {
       // 랜덤 행동 선택
       const rand = Math.random();
 
-      if (rand < 0.7) {
-        // 70%: 좌우로 걷기 (방치형 게임 - 주로 화면 하단)
+      if (rand < 0.8) {
+        // 80%: 좌우로 걷기 (방치형 게임 - 주로 화면 하단)
         this.targetX = Math.random() * (screenWidth - this.width);
 
         // 대부분 화면 하단에 머무름 (하단 영역)
@@ -164,18 +152,18 @@ export class Pet {
         this.state = 'walking';
         // 항상 로그 출력 (임시 디버깅)
         console.log(`[AI] New target: (${Math.floor(this.targetX)}, ${Math.floor(this.targetY)}), Current: (${Math.floor(this.x)}, ${Math.floor(this.y)}), Screen: ${screenWidth}x${screenHeight}`);
-      } else if (rand < 0.85) {
-        // 15%: 앉기
-        this.state = 'sitting';
-        this.velocityX = 0;
-        this.velocityY = 0;
-        console.log(`[AI] Sitting`);
-      } else {
-        // 15%: 가만히 서있기
+      } else if (rand < 0.9) {
+        // 10%: 잠깐 서있기
         this.state = 'idle';
         this.velocityX = 0;
         this.velocityY = 0;
         console.log(`[AI] Idle`);
+      } else {
+        // 10%: 앉기
+        this.state = 'sitting';
+        this.velocityX = 0;
+        this.velocityY = 0;
+        console.log(`[AI] Sitting`);
       }
     }
 
@@ -207,13 +195,13 @@ export class Pet {
   private updateStats(deltaTime: number): void {
     const secondsPassed = deltaTime / 1000;
 
-    // 시간에 따라 감소
-    this.hunger = Math.max(0, this.hunger - secondsPassed * 0.5);
-    this.energy = Math.max(0, this.energy - secondsPassed * 0.3);
+    // 시간에 따라 감소 (방치형 게임 - 매우 느리게)
+    this.hunger = Math.max(0, this.hunger - secondsPassed * 0.05);  // 10배 느리게
+    this.energy = Math.max(0, this.energy - secondsPassed * 0.03);  // 10배 느리게
 
     // 행복도는 배고픔과 에너지에 영향받음
-    if (this.hunger < 30 || this.energy < 20) {
-      this.happiness = Math.max(0, this.happiness - secondsPassed * 0.5);
+    if (this.hunger < 10 || this.energy < 10) {
+      this.happiness = Math.max(0, this.happiness - secondsPassed * 0.1);
     } else {
       this.happiness = Math.min(100, this.happiness + secondsPassed * 0.1);
     }
