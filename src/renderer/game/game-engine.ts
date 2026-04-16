@@ -49,14 +49,18 @@ export class GameEngine {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d')!;
 
+    // Canvas 렌더링 품질 설정
+    this.ctx.imageSmoothingEnabled = true;
+    this.ctx.imageSmoothingQuality = 'high';
+
     // Canvas 크기 설정
     this.canvas.width = window.innerWidth;
     this.canvas.height = window.innerHeight;
 
     // Pet 생성 (화면 중앙 하단)
     this.pet = new Pet(
-      this.canvas.width / 2 - 16,
-      this.canvas.height - 100
+      this.canvas.width / 2 - 32,
+      this.canvas.height - 150
     );
 
     this.collisionDetector = new CollisionDetector();
@@ -75,14 +79,18 @@ export class GameEngine {
       this.stats.sessions++;
       this.lastTime = performance.now();
       this.gameLoop(this.lastTime);
-      console.log('Game engine started');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Game engine started');
+      }
     }
   }
 
   stop(): void {
     this.running = false;
     this.saveGame();
-    console.log('Game engine stopped');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Game engine stopped');
+    }
   }
 
   private gameLoop(currentTime: number): void {
@@ -159,7 +167,9 @@ export class GameEngine {
         }
         this.stats.foodEaten[food.type.id]++;
 
-        console.log(`Pet ate ${food.type.name}! +${food.type.experience} EXP`);
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`Pet ate ${food.type.name}! +${food.type.experience} EXP`);
+        }
 
         // 이펙트 (추후 구현)
         this.showEatEffect(food.x, food.y);
@@ -172,7 +182,9 @@ export class GameEngine {
 
   private showEatEffect(x: number, y: number): void {
     // TODO: 파티클 이펙트
-    console.log(`Eat effect at (${x}, ${y})`);
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Eat effect at (${x}, ${y})`);
+    }
   }
 
   private updateFoodSpawning(deltaTime: number): void {
@@ -188,24 +200,27 @@ export class GameEngine {
   }
 
   spawnRandomFood(): void {
-    // 랜덤 위치 (화면 안쪽)
     const x = 50 + Math.random() * (this.canvas.width - 100);
-    const y = 50 + Math.random() * (this.canvas.height - 200);
+    const y = 50 + Math.random() * (this.canvas.height - 100);
 
     const food = Food.createRandom(x, y);
     this.foods.push(food);
 
-    console.log(`Spawned ${food.type.name} at (${x}, ${y})`);
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Spawned ${food.type.name} at (${x}, ${y})`);
+    }
   }
 
   spawnFood(foodId: string): void {
     const x = 50 + Math.random() * (this.canvas.width - 100);
-    const y = 50 + Math.random() * (this.canvas.height - 200);
+    const y = 50 + Math.random() * (this.canvas.height - 100);
 
     const food = Food.createById(foodId, x, y);
     if (food) {
       this.foods.push(food);
-      console.log(`Spawned ${food.type.name} at (${x}, ${y})`);
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`Spawned ${food.type.name} at (${x}, ${y})`);
+      }
     }
   }
 
@@ -229,7 +244,9 @@ export class GameEngine {
   updateSettings(newSettings: Partial<GameSettings>): void {
     this.settings = { ...this.settings, ...newSettings };
     this.saveGame();
-    console.log('Settings updated:', this.settings);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Settings updated:', this.settings);
+    }
   }
 
   async saveGame(): Promise<void> {
@@ -249,7 +266,9 @@ export class GameEngine {
       };
 
       await window.api.saveGame(saveData);
-      console.log('Game saved successfully');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Game saved successfully');
+      }
     } catch (error) {
       console.error('Failed to save game:', error);
     }
@@ -278,10 +297,14 @@ export class GameEngine {
           this.inventory = saveData.inventory;
         }
 
-        console.log('Game loaded successfully');
-        console.log(`Play time: ${Math.floor(this.stats.totalPlayTime / 1000 / 60)} minutes`);
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Game loaded successfully');
+          console.log(`Play time: ${Math.floor(this.stats.totalPlayTime / 1000 / 60)} minutes`);
+        }
       } else {
-        console.log('No save file found, starting new game');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('No save file found, starting new game');
+        }
       }
     } catch (error) {
       console.error('Failed to load game:', error);
@@ -338,7 +361,9 @@ export class GameEngine {
 
       const accessory = ACCESSORIES.find(a => a.id === accessoryId);
       if (accessory) {
-        console.log(`🎉 새로운 액세서리 해금: ${accessory.name}!`);
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`🎉 새로운 액세서리 해금: ${accessory.name}!`);
+        }
 
         // 알림 표시
         if (typeof window !== 'undefined' && window.api) {
@@ -367,7 +392,9 @@ export class GameEngine {
   private onResize(): void {
     this.canvas.width = window.innerWidth;
     this.canvas.height = window.innerHeight;
-    console.log(`Canvas resized to ${this.canvas.width}x${this.canvas.height}`);
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Canvas resized to ${this.canvas.width}x${this.canvas.height}`);
+    }
   }
 
   // 테스트용 메서드

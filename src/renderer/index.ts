@@ -10,7 +10,7 @@ declare global {
       saveGame: (data: any) => Promise<any>;
       loadGame: () => Promise<any>;
       deleteSave: () => Promise<any>;
-      setClickable: (bounds: { x: number; y: number; width: number; height: number }) => void;
+      setClickable: () => void;
       setClickThrough: () => void;
       showNotification: (title: string, body: string) => void;
       quitApp: () => void;
@@ -18,9 +18,6 @@ declare global {
   }
 }
 
-console.log('🐕 PixelWindow Starting...');
-
-// Canvas 가져오기
 const canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
 if (!canvas) {
   throw new Error('Canvas element not found');
@@ -54,16 +51,62 @@ function updateDebugInfo(): void {
     const pet = gameEngine.getPet();
     const petXElement = document.getElementById('petX');
     const petYElement = document.getElementById('petY');
+    const petVXElement = document.getElementById('petVX');
+    const petVYElement = document.getElementById('petVY');
     const petStateElement = document.getElementById('petState');
 
     if (petXElement) petXElement.textContent = Math.floor(pet.x).toString();
     if (petYElement) petYElement.textContent = Math.floor(pet.y).toString();
+    if (petVXElement) petVXElement.textContent = pet.velocityX.toFixed(2);
+    if (petVYElement) petVYElement.textContent = pet.velocityY.toFixed(2);
     if (petStateElement) petStateElement.textContent = pet.state;
   }
 }
 
 // 디버그 업데이트 루프
 setInterval(updateDebugInfo, 16);
+
+// 클릭 통과 기능: 마우스가 강아지/메뉴 위에 있을 때만 클릭 가능
+let isOverPet = false;
+let mouseX = 0;
+let mouseY = 0;
+
+// 마우스 위치 추적
+window.addEventListener('mousemove', (e) => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+});
+
+// 초기: 클릭 통과 활성화 (투명 영역은 클릭 통과)
+if (window.api) {
+  window.api.setClickThrough();
+}
+
+// 주기적으로 마우스 위치 확인하여 클릭 통과 설정 (60fps)
+setInterval(() => {
+  // 메뉴나 모달이 열려있으면 항상 클릭 가능
+  if (menu.classList.contains('visible') || customizeModal.classList.contains('visible')) {
+    if (!isOverPet) {
+      isOverPet = true;
+      window.api.setClickable();
+    }
+    return;
+  }
+
+  // 마우스가 강아지 위에 있는지 확인
+  const pet = gameEngine.getPet();
+  const petBounds = pet.getBounds();
+  const mouseOverPet = collisionDetector.checkPointInRect(mouseX, mouseY, petBounds);
+
+  if (mouseOverPet !== isOverPet) {
+    isOverPet = mouseOverPet;
+    if (isOverPet) {
+      window.api.setClickable();
+    } else {
+      window.api.setClickThrough();
+    }
+  }
+}, 16); // ~60fps
 
 // 메뉴 관련
 const menu = document.getElementById('menu')!;
@@ -102,25 +145,16 @@ canvas.addEventListener('click', (e) => {
     if (menu.classList.contains('visible')) {
       menu.classList.remove('visible');
     } else {
-      // 메뉴 위치 조정 (화면 밖으로 나가지 않도록)
-      let menuX = e.clientX;
-      let menuY = e.clientY;
+      // 메뉴를 화면 우하단 고정 위치에 표시 (작업표시줄 위)
+      const marginRight = 20;
+      const marginBottom = 60; // 작업표시줄을 고려한 여백
 
-      const menuWidth = 200;
-      const menuHeight = 250;
-
-      if (menuX + menuWidth > window.innerWidth) {
-        menuX = window.innerWidth - menuWidth - 10;
-      }
-      if (menuY + menuHeight > window.innerHeight) {
-        menuY = window.innerHeight - menuHeight - 10;
-      }
-
-      menu.style.left = `${menuX}px`;
-      menu.style.top = `${menuY}px`;
+      menu.style.right = `${marginRight}px`;
+      menu.style.bottom = `${marginBottom}px`;
+      menu.style.left = 'auto';
+      menu.style.top = 'auto';
       menu.classList.add('visible');
 
-      // 메뉴 정보 업데이트
       updateMenu();
     }
   } else {
@@ -331,35 +365,25 @@ window.addEventListener('keydown', (e) => {
     }
   }
 
-  // Ctrl+Shift+F: 랜덤 먹이 생성
   if (e.ctrlKey && e.shiftKey && e.key === 'F') {
     gameEngine.spawnRandomFood();
-    console.log('Spawned random food (hotkey)');
   }
 
-  // Ctrl+Shift+L: 레벨업 테스트
   if (e.ctrlKey && e.shiftKey && e.key === 'L') {
     gameEngine.testLevelUp();
-    console.log('Level up test (hotkey)');
   }
 
-  // Ctrl+Shift+A: 모든 먹이 생성
   if (e.ctrlKey && e.shiftKey && e.key === 'A') {
     gameEngine.testSpawnAllFoods();
-    console.log('Spawned all food types (hotkey)');
   }
 });
 
-// 앱 종료 시 자동 저장
 window.addEventListener('beforeunload', async (e) => {
   await gameEngine.saveGame();
 });
 
-// 게임 시작
-console.log('🎮 Starting game engine...');
 gameEngine.start();
 
-// 시작 알림
 setTimeout(() => {
   window.api.showNotification(
     'PixelWindow 🐕',
@@ -367,15 +391,6 @@ setTimeout(() => {
   );
 }, 1000);
 
-// 첫 번째 먹이 생성 (10초 후)
 setTimeout(() => {
   gameEngine.spawnRandomFood();
-  console.log('Initial food spawned');
 }, 10000);
-
-console.log('✅ PixelWindow Ready!');
-console.log('Controls:');
-console.log('  - Click on pet to open menu');
-console.log('  - Ctrl+Shift+F: Spawn food');
-console.log('  - Ctrl+Shift+L: Level up test');
-console.log('  - Ctrl+Shift+D: Toggle debug info');

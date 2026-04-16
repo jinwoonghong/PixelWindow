@@ -13,8 +13,8 @@ export class Pet {
   onGround: boolean = false;
 
   // 크기
-  width: number = 32;
-  height: number = 32;
+  width: number = 64;
+  height: number = 64;
 
   // 상태
   state: PetAnimationState = 'idle';
@@ -32,17 +32,44 @@ export class Pet {
   // 애니메이션
   currentFrame: number = 0;
   frameTimer: number = 0;
-  frameDelay: number = 100; // ms
+  frameDelay: number = 200; // ms (애니메이션 속도 느리게)
+  maxFrames: number = 5; // 스프라이트 시트의 열 개수
 
   // AI
   aiTimer: number = 0;
-  aiDelay: number = 2000; // ms
+  aiDelay: number = 3000; // ms (행동 변경 주기)
   targetX: number = 0;
+  targetY: number = 0;
+
+  // 스프라이트 이미지
+  private spriteImage: HTMLImageElement | null = null;
+  private spriteLoaded: boolean = false;
 
   constructor(x: number, y: number) {
     this.x = x;
     this.y = y;
     this.targetX = x;
+    this.targetY = y;
+    this.loadSprite();
+  }
+
+  private loadSprite(): void {
+    const levelKey = `level${this.level}`;
+    const img = new Image();
+    img.onload = () => {
+      this.spriteImage = img;
+      this.spriteLoaded = true;
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`Pet sprite ${levelKey} loaded`);
+      }
+    };
+    img.onerror = () => {
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`Failed to load sprite for ${levelKey}, using pixel art fallback`);
+      }
+      this.spriteLoaded = false;
+    };
+    img.src = `assets/sprites/dog/dog_${levelKey}.png`;
   }
 
   update(deltaTime: number, screenWidth: number, screenHeight: number): void {
@@ -53,74 +80,53 @@ export class Pet {
   }
 
   private updatePhysics(screenWidth: number, screenHeight: number): void {
-    // 중력 적용
-    if (!this.onGround) {
-      this.velocityY += 0.5;
-    }
-
     // 속도 적용
     this.x += this.velocityX;
     this.y += this.velocityY;
 
-    // 지면 충돌
-    const groundY = screenHeight - this.height - 10;
-    if (this.y >= groundY) {
-      this.y = groundY;
-      this.velocityY = 0;
-      this.onGround = true;
-
-      // 착지 시 상태 변경
-      if (this.state === 'jumping') {
-        this.state = 'idle';
-      }
-    } else {
-      this.onGround = false;
-    }
-
-    // 벽 충돌
+    // X축 경계 - 경계에 닿으면 즉시 새 목표 설정
+    let hitBoundary = false;
     if (this.x <= 0) {
       this.x = 0;
-      this.velocityX = 0;
       this.direction = 'right';
+      hitBoundary = true;
     }
     if (this.x >= screenWidth - this.width) {
       this.x = screenWidth - this.width;
-      this.velocityX = 0;
       this.direction = 'left';
+      hitBoundary = true;
     }
 
-    // 마찰
-    this.velocityX *= 0.8;
-
-    // 거의 정지했으면 완전히 멈춤
-    if (Math.abs(this.velocityX) < 0.1) {
-      this.velocityX = 0;
-      if (this.state === 'walking' || this.state === 'running') {
-        this.state = 'idle';
-      }
+    // Y축 경계
+    if (this.y <= 0) {
+      this.y = 0;
+      hitBoundary = true;
     }
+    if (this.y >= screenHeight - this.height) {
+      this.y = screenHeight - this.height;
+      hitBoundary = true;
+    }
+
+    // 경계에 닿으면 즉시 새 행동 선택
+    if (hitBoundary) {
+      this.aiTimer = this.aiDelay;
+    }
+
+    this.onGround = false;
   }
 
   private updateAnimation(deltaTime: number): void {
     this.frameTimer += deltaTime;
 
     if (this.frameTimer >= this.frameDelay) {
-      this.currentFrame = (this.currentFrame + 1) % 4;
+      this.currentFrame = (this.currentFrame + 1) % this.maxFrames;
       this.frameTimer = 0;
     }
   }
 
   private updateAI(deltaTime: number, screenWidth: number, screenHeight: number): void {
-    // 에너지나 배고픔이 낮으면 가만히 있음
-    if (this.energy < 20) {
-      this.state = 'sleeping';
-      return;
-    }
-
-    if (this.hunger < 30) {
-      this.state = 'sitting';
-      return;
-    }
+    // 방치형 게임 - sleeping/sitting 조건 제거
+    // 항상 활동적으로 움직임
 
     this.aiTimer += deltaTime;
 
@@ -130,37 +136,58 @@ export class Pet {
       // 랜덤 행동 선택
       const rand = Math.random();
 
-      if (rand < 0.3) {
-        // 30%: 랜덤 위치로 이동
+      if (rand < 0.8) {
+        // 80%: 좌우로 걷기 (방치형 게임 - 주로 화면 하단)
         this.targetX = Math.random() * (screenWidth - this.width);
-        this.state = 'walking';
-      } else if (rand < 0.5) {
-        // 20%: 점프
-        if (this.onGround) {
-          this.jump();
+
+        // 대부분 화면 하단에 머무름 (하단 영역)
+        if (Math.random() < 0.8) {
+          // 80% 확률로 하단 영역
+          this.targetY = screenHeight - 150 - Math.random() * 100;
+        } else {
+          // 20% 확률로 중간 정도까지 올라감
+          this.targetY = screenHeight * 0.5 + Math.random() * (screenHeight * 0.3);
         }
-      } else if (rand < 0.7) {
-        // 20%: 앉기
-        this.state = 'sitting';
-        this.velocityX = 0;
-      } else {
-        // 30%: 가만히 서있기
+
+        this.state = 'walking';
+        // 항상 로그 출력 (임시 디버깅)
+        console.log(`[AI] New target: (${Math.floor(this.targetX)}, ${Math.floor(this.targetY)}), Current: (${Math.floor(this.x)}, ${Math.floor(this.y)}), Screen: ${screenWidth}x${screenHeight}`);
+      } else if (rand < 0.9) {
+        // 10%: 잠깐 서있기
         this.state = 'idle';
         this.velocityX = 0;
+        this.velocityY = 0;
+        console.log(`[AI] Idle`);
+      } else {
+        // 10%: 앉기
+        this.state = 'sitting';
+        this.velocityX = 0;
+        this.velocityY = 0;
+        console.log(`[AI] Sitting`);
       }
     }
 
-    // 목표 위치로 이동
+    // 목표 위치로 이동 (주로 X축, Y축은 매우 느리게)
     if (this.state === 'walking' || this.state === 'running') {
-      const distToTarget = this.targetX - this.x;
+      const distX = this.targetX - this.x;
+      const distY = this.targetY - this.y;
+      const totalDist = Math.sqrt(distX * distX + distY * distY);
 
-      if (Math.abs(distToTarget) > 5) {
-        const speed = this.state === 'running' ? 3 : 1.5;
-        this.velocityX = Math.sign(distToTarget) * speed;
-        this.direction = distToTarget > 0 ? 'right' : 'left';
+      if (totalDist > 20) {
+        // X축은 정상 속도, Y축은 매우 느리게 (부드러운 이동)
+        const baseSpeed = 3; // 속도 더 증가
+        this.velocityX = (distX / totalDist) * baseSpeed;
+        this.velocityY = (distY / totalDist) * baseSpeed * 0.2; // Y축은 20% 속도
+        this.direction = distX > 0 ? 'right' : 'left';
+
+        // 항상 로그 출력 (임시 디버깅)
+        if (Math.random() < 0.01) {
+          console.log(`[MOVE] velocity=(${this.velocityX.toFixed(2)}, ${this.velocityY.toFixed(2)}), pos=(${Math.floor(this.x)}, ${Math.floor(this.y)}), dist=${Math.floor(totalDist)}`);
+        }
       } else {
-        this.velocityX = 0;
-        this.state = 'idle';
+        // 목표 도착 - 새로운 목표 설정
+        console.log(`[MOVE] Reached target, selecting new target`);
+        this.aiTimer = this.aiDelay; // 즉시 새 행동 선택
       }
     }
   }
@@ -168,13 +195,13 @@ export class Pet {
   private updateStats(deltaTime: number): void {
     const secondsPassed = deltaTime / 1000;
 
-    // 시간에 따라 감소
-    this.hunger = Math.max(0, this.hunger - secondsPassed * 0.5);
-    this.energy = Math.max(0, this.energy - secondsPassed * 0.3);
+    // 시간에 따라 감소 (방치형 게임 - 매우 느리게)
+    this.hunger = Math.max(0, this.hunger - secondsPassed * 0.05);  // 10배 느리게
+    this.energy = Math.max(0, this.energy - secondsPassed * 0.03);  // 10배 느리게
 
     // 행복도는 배고픔과 에너지에 영향받음
-    if (this.hunger < 30 || this.energy < 20) {
-      this.happiness = Math.max(0, this.happiness - secondsPassed * 0.5);
+    if (this.hunger < 10 || this.energy < 10) {
+      this.happiness = Math.max(0, this.happiness - secondsPassed * 0.1);
     } else {
       this.happiness = Math.min(100, this.happiness + secondsPassed * 0.1);
     }
@@ -210,41 +237,76 @@ export class Pet {
     const size = this.width;
     const frame = Math.floor(this.currentFrame);
 
-    // 크기는 레벨에 따라 조정
-    const levelData = LEVEL_REQUIREMENTS.find(l => l.level === this.level);
-    const scale = levelData ? levelData.size / 32 : 1;
-
-    ctx.save();
-    ctx.scale(scale, scale);
-
-    switch (this.state) {
-      case 'idle':
-        this.renderIdle(ctx, size, frame);
-        break;
-      case 'walking':
-      case 'running':
-        this.renderWalking(ctx, size, frame);
-        break;
-      case 'sitting':
-        this.renderSitting(ctx, size);
-        break;
-      case 'sleeping':
-        this.renderSleeping(ctx, size, frame);
-        break;
-      case 'eating':
-        this.renderEating(ctx, size, frame);
-        break;
-      case 'jumping':
-        this.renderJumping(ctx, size);
-        break;
-      default:
-        this.renderIdle(ctx, size, frame);
+    // 스프라이트 이미지가 로드되어 있으면 사용
+    if (this.spriteLoaded && this.spriteImage) {
+      this.renderFromSpriteSheet(ctx, size, frame);
+    } else {
+      // 폴백: 픽셀 아트 렌더링
+      switch (this.state) {
+        case 'idle':
+          this.renderIdle(ctx, size, frame);
+          break;
+        case 'walking':
+        case 'running':
+          this.renderWalking(ctx, size, frame);
+          break;
+        case 'sitting':
+          this.renderSitting(ctx, size);
+          break;
+        case 'sleeping':
+          this.renderSleeping(ctx, size, frame);
+          break;
+        case 'eating':
+          this.renderEating(ctx, size, frame);
+          break;
+        case 'jumping':
+          this.renderJumping(ctx, size);
+          break;
+        default:
+          this.renderIdle(ctx, size, frame);
+      }
     }
 
     // 액세서리 렌더링
-    this.renderAccessories(ctx, size, scale);
+    this.renderAccessories(ctx, size, 1);
+  }
 
-    ctx.restore();
+  private renderFromSpriteSheet(ctx: CanvasRenderingContext2D, size: number, frame: number): void {
+    if (!this.spriteImage) return;
+
+    // 스프라이트 시트 구조: 5열 × 4행
+    // 원본 이미지 크기: 1024 × 1024
+    const imageWidth = this.spriteImage.width;  // 1024
+    const imageHeight = this.spriteImage.height; // 1024
+    const cols = 5;
+    const rows = 4;
+
+    // 각 셀의 실제 크기
+    const cellWidth = imageWidth / cols;   // 204.8
+    const cellHeight = imageHeight / rows; // 256
+
+    // 상태에 따른 행 결정 (이미지 구조에 맞춤)
+    const stateRowMap: Record<PetAnimationState, number> = {
+      'idle': 0,        // 1행: 서있기
+      'walking': 1,     // 2행: 걷기
+      'running': 1,     // 2행: 걷기 (running도 walking 사용)
+      'eating': 2,      // 3행: 먹기
+      'sitting': 3,     // 4행: 앉기
+      'sleeping': 3,    // 4행: 앉기 (sleeping도 sitting 사용)
+      'jumping': 1      // 2행: 걷기
+    };
+
+    const row = stateRowMap[this.state] || 0;
+    const col = frame % cols;
+
+    // 스프라이트 시트에서 해당 프레임 추출하여 확대해서 그리기
+    ctx.drawImage(
+      this.spriteImage,
+      col * cellWidth, row * cellHeight,      // source x, y
+      cellWidth, cellHeight,                  // source width, height
+      0, 0,                                   // dest x, y
+      size, size                              // dest width, height (확대)
+    );
   }
 
   private renderAccessories(ctx: CanvasRenderingContext2D, size: number, scale: number): void {
@@ -629,6 +691,9 @@ export class Pet {
       this.height = levelData.size;
     }
 
+    // 새로운 레벨의 스프라이트 로드
+    this.loadSprite();
+
     // 알림
     if (typeof window !== 'undefined' && window.api) {
       window.api.showNotification(
@@ -637,15 +702,13 @@ export class Pet {
       );
     }
 
-    console.log(`Pet leveled up to ${this.level}!`);
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Pet leveled up to ${this.level}!`);
+    }
   }
 
   jump(): void {
-    if (this.onGround) {
-      this.velocityY = -12;
-      this.onGround = false;
-      this.state = 'jumping';
-    }
+    // 2D 평면 모드에서는 점프 기능 비활성화
   }
 
   // 액세서리 관련 메서드

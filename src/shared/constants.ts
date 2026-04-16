@@ -4,8 +4,8 @@ export const GAME_CONFIG = {
   FPS: 60,
   CANVAS_WIDTH: 1920,
   CANVAS_HEIGHT: 1080,
-  PET_SIZE: 32,
-  FOOD_SIZE: 16,
+  PET_SIZE: 64,
+  FOOD_SIZE: 32,
 };
 
 export const PHYSICS = {
@@ -15,9 +15,9 @@ export const PHYSICS = {
 };
 
 export const LEVEL_REQUIREMENTS = [
-  { level: 1, expRequired: 0, size: 16 },
-  { level: 2, expRequired: 100, size: 24 },
-  { level: 3, expRequired: 300, size: 32 },
+  { level: 1, expRequired: 0, size: 64 },
+  { level: 2, expRequired: 100, size: 80 },
+  { level: 3, expRequired: 300, size: 96 },
 ];
 
 export const FOOD_TYPES = [
@@ -49,9 +49,9 @@ export const FOOD_TYPES = [
     spawnWeight: 5
   },
   {
-    id: 'treat',
+    id: 'snack',
     name: '간식',
-    sprite: 'treat.png',
+    sprite: 'snack.png',
     experience: 5,
     hunger: 10,
     happiness: 30,
@@ -163,7 +163,7 @@ export const ACCESSORIES = [
     unlockRequirement: {
       type: 'food' as const,
       value: 30,
-      foodId: 'treat'
+      foodId: 'snack'
     },
     renderOffset: { x: 2, y: -4 }
   },

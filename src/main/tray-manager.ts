@@ -42,19 +42,17 @@ export class TrayManager {
     console.log('System tray created');
   }
 
-  private createDefaultIcon(): nativeImage {
-    // 임시 16x16 픽셀 아이콘 생성 (빨간 사각형)
+  private createDefaultIcon(): Electron.NativeImage {
     const size = 16;
     const canvas = Buffer.alloc(size * size * 4);
 
     for (let y = 0; y < size; y++) {
       for (let x = 0; x < size; x++) {
         const idx = (y * size + x) * 4;
-        // RGBA
-        canvas[idx] = 255;     // R
-        canvas[idx + 1] = 100; // G
-        canvas[idx + 2] = 100; // B
-        canvas[idx + 3] = 255; // A
+        canvas[idx] = 255;
+        canvas[idx + 1] = 100;
+        canvas[idx + 2] = 100;
+        canvas[idx + 3] = 255;
       }
     }
 

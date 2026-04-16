@@ -1,0 +1,22 @@
+# PixelWindow Food Items Prompts
+# 사용법: Stable Diffusion WebUI에서 Script → "Prompts from file or textbox" 선택 후 이 파일 로드
+
+# 뼈다귀 (bone.png)
+cute pixel art dog bone icon, game asset, white bone, clean design, transparent background, centered, simple silhouette, 1024x1024, high quality, professional game sprite, flat design
+--negative-- background, gradient, complex, blurry, low quality, watermark, text, multiple objects, shadow, realistic photo, 3d render
+
+# 생선 (fish.png)
+cute pixel art fish icon, game asset, fresh salmon, clean design, transparent background, centered, simple silhouette, 1024x1024, high quality, professional game sprite, flat design, whole fish
+--negative-- background, gradient, complex, blurry, low quality, watermark, text, multiple objects, shadow, realistic photo, 3d render
+
+# 고기 (meat.png)
+cute pixel art premium meat icon, game asset, juicy steak, clean design, transparent background, centered, simple silhouette, 1024x1024, high quality, professional game sprite, flat design, red meat
+--negative-- background, gradient, complex, blurry, low quality, watermark, text, multiple objects, shadow, realistic photo, 3d render
+
+# 간식 (snack.png)
+cute pixel art dog treat icon, game asset, dog biscuit, bone-shaped cookie, clean design, transparent background, centered, simple silhouette, 1024x1024, high quality, professional game sprite, flat design
+--negative-- background, gradient, complex, blurry, low quality, watermark, text, multiple objects, shadow, realistic photo, 3d render
+
+# 특별식 (special.png)
+cute pixel art premium dog food icon, game asset, golden bowl with sparkles, magical glow, clean design, transparent background, centered, simple silhouette, 1024x1024, high quality, professional game sprite, flat design, luxury food
+--negative-- background, gradient, complex, blurry, low quality, watermark, text, multiple objects, shadow, realistic photo, 3d render
